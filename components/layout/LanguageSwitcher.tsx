@@ -13,12 +13,27 @@ export function LanguageSwitcher({
   locale,
   label,
   className,
+  tone = "dark",
 }: {
   locale: Locale;
   label: string;
   className?: string;
+  /** "dark" text for light backgrounds, "light" text for dark backgrounds. */
+  tone?: "dark" | "light";
 }) {
   const pathname = usePathname();
+  const styles =
+    tone === "light"
+      ? {
+          sep: "text-white/30",
+          active: "text-white",
+          inactive: "text-white/60 hover:text-white",
+        }
+      : {
+          sep: "text-text-dark/25",
+          active: "text-primary",
+          inactive: "text-text-dark/55 hover:text-primary",
+        };
 
   function pathForLocale(target: Locale) {
     const segments = pathname.split("/");
@@ -39,16 +54,14 @@ export function LanguageSwitcher({
     >
       {locales.map((l, i) => (
         <span key={l} className="flex items-center">
-          {i > 0 ? <span className="px-1 text-white/30">/</span> : null}
+          {i > 0 ? <span className={cn("px-1", styles.sep)}>/</span> : null}
           <Link
             href={pathForLocale(l)}
             hrefLang={l}
             aria-current={l === locale ? "true" : undefined}
             className={cn(
               "rounded px-1 font-medium transition-colors",
-              l === locale
-                ? "text-white"
-                : "text-white/60 hover:text-white",
+              l === locale ? styles.active : styles.inactive,
             )}
           >
             {localeNames[l]}

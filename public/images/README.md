@@ -1,8 +1,9 @@
 # Image assets
 
-Drop real photography here using the filenames below. Until a real file exists,
-the UI renders a branded gradient placeholder automatically — no code change is
-needed to keep the site looking finished.
+**Just drop your photos in this folder using the exact filenames below** — the
+site uses them automatically. No code change is needed. Until a file exists (or
+if one fails to load), a branded gradient placeholder renders in its place, so
+the layout always looks finished.
 
 ## Expected files
 
@@ -20,13 +21,12 @@ needed to keep the site looking finished.
 | `service-recovery-sessions.jpg` | Services page | 1200×900 (4:3) |
 | `service-cupping-sessions.jpg` | Services page | 1200×900 (4:3) |
 
-## Switching a placeholder to a real photo
+## Notes
 
-Placeholders are rendered by `components/ui/ImagePlaceholder.tsx`. Once you add a
-real file, pass `hasImage` at the call site to render it via `next/image`:
-
-```tsx
-<ImagePlaceholder src="/images/hero-image.jpg" alt="..." hasImage />
-```
-
-Service image paths are defined in `lib/services.ts`.
+- Filenames are **case-sensitive** and must match exactly (including `.jpg`).
+- If your files are `.png`/`.webp`, either rename them to `.jpg` **or** update
+  the paths: hero/mission/about paths live in the page/section files, and the
+  per-service image paths live in [`lib/services.ts`](../../lib/services.ts).
+- Only have **one** services photo? Name it after any single service; the rest
+  keep their branded placeholders until you add more.
+- Logo files go in [`public/logo/`](../logo/) — see that folder's README.

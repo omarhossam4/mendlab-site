@@ -1,11 +1,30 @@
-import { BadgeCheck, HeartPulse, Sparkles, UserRound } from "lucide-react";
+import {
+  BadgeCheck,
+  Dumbbell,
+  FlaskConical,
+  HeartPulse,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
+  Users,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { LocalizedProps } from "@/types";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
 import { Reveal } from "@/components/ui/Reveal";
 
-const icons: LucideIcon[] = [BadgeCheck, UserRound, HeartPulse, Sparkles];
+// One icon per "Why Choose Mend Lab" highlight, in order.
+const icons: LucideIcon[] = [
+  FlaskConical,
+  Dumbbell,
+  Sparkles,
+  ShieldCheck,
+  Trophy,
+  Users,
+  BadgeCheck,
+  HeartPulse,
+];
 
 export function WhySection({ dict }: LocalizedProps) {
   const t = dict.home.why;

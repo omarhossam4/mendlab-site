@@ -25,10 +25,10 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-primary-dark text-white shadow-[var(--shadow-card)]">
+    <header className="sticky top-0 z-50 border-b border-primary-100 bg-surface/95 text-text-dark backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <Container>
         <div className="flex h-16 items-center justify-between gap-4">
-          <Logo locale={locale} variant="light" />
+          <Logo locale={locale} variant="dark" />
 
           <nav
             className="hidden items-center gap-1 lg:flex"
@@ -42,8 +42,8 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-medium transition-colors",
                   isActive(link.href)
-                    ? "bg-white/15 text-white"
-                    : "text-white/80 hover:bg-white/10 hover:text-white",
+                    ? "bg-primary-50 text-primary"
+                    : "text-text-dark/70 hover:bg-primary-50 hover:text-primary",
                 )}
               >
                 {link.label}
@@ -52,10 +52,14 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           </nav>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <LanguageSwitcher locale={locale} label={dict.nav.switchLanguage} />
+            <LanguageSwitcher
+              locale={locale}
+              label={dict.nav.switchLanguage}
+              tone="dark"
+            />
             <Button
               href={localeHref(locale, "/booking")}
-              variant="secondary"
+              variant="primary"
               size="sm"
             >
               {dict.nav.bookNow}
@@ -64,7 +68,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-text-dark transition-colors hover:bg-primary-50 lg:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={open ? dict.nav.closeMenu : dict.nav.openMenu}
@@ -76,7 +80,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
       {/* Mobile menu */}
       {open ? (
-        <div className="border-t border-white/10 lg:hidden">
+        <div className="border-t border-primary-100 bg-surface lg:hidden">
           <Container className="py-4">
             <nav className="flex flex-col gap-1" aria-label="Mobile">
               {links.map((link) => (
@@ -88,21 +92,22 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                   className={cn(
                     "rounded-lg px-4 py-3 text-base font-medium transition-colors",
                     isActive(link.href)
-                      ? "bg-white/15 text-white"
-                      : "text-white/85 hover:bg-white/10",
+                      ? "bg-primary-50 text-primary"
+                      : "text-text-dark/80 hover:bg-primary-50",
                   )}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="mt-3 flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+              <div className="mt-3 flex items-center justify-between gap-4 border-t border-primary-100 pt-4">
                 <LanguageSwitcher
                   locale={locale}
                   label={dict.nav.switchLanguage}
+                  tone="dark"
                 />
                 <Button
                   href={localeHref(locale, "/booking")}
-                  variant="secondary"
+                  variant="primary"
                   size="sm"
                   onClick={() => setOpen(false)}
                 >
