@@ -45,7 +45,7 @@ export function Logo({
           width={293}
           height={160}
           priority
-          className="h-10 w-auto sm:h-11"
+          className="h-12 w-auto sm:h-14"
           onError={() => setFailed(true)}
         />
       ) : (

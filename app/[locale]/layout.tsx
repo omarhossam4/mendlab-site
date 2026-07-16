@@ -6,6 +6,7 @@ import { locales, localeDirection, isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { MobileCtaBar } from "@/components/layout/MobileCtaBar";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -75,6 +76,9 @@ export default async function LocaleLayout({
         <Header locale={locale} dict={dict} />
         <main className="flex-1">{children}</main>
         <Footer locale={locale} dict={dict} />
+        {/* Spacer so the fixed mobile CTA bar never hides footer content */}
+        <div aria-hidden className="h-20 lg:hidden" />
+        <MobileCtaBar locale={locale} dict={dict} />
       </body>
     </html>
   );

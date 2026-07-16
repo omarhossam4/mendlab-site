@@ -30,7 +30,12 @@
       "title": "Recover Smarter. Perform Better.",
       "subtitle": "Mend Lab bridges advanced sports science and traditional therapy to optimize your physical restoration, performance, and overall well-being.",
       "primaryCta": "Book a Session",
-      "secondaryCta": "Explore Services"
+      "secondaryCta": "Explore Services",
+      "stats": [
+        { "value": "7+", "label": "Recovery Therapies" },
+        { "value": "100%", "label": "Sterile Protocols" },
+        { "value": "1:1", "label": "Personalized Care" }
+      ]
     },
     "mission": {
       "eyebrow": "Our Mission",
