@@ -1,36 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mend Lab — Recovery & Wellness Clinic
 
-## Getting Started
+A premium, bilingual (English + Arabic with full RTL) marketing and booking
+website for **Mend Lab**, a science-driven recovery and wellness clinic in
+Cairo, Egypt.
 
-First, run the development server:
+## Tech stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 16** (App Router) + **React 19** + **TypeScript** (strict)
+- **Tailwind CSS v4** (CSS-first theme in [`app/globals.css`](app/globals.css))
+- **Native i18n** with locale-prefixed routing (`/en`, `/ar`) and automatic
+  `dir="rtl"` for Arabic — no i18n library dependency, using the App Router's
+  built-in dictionary pattern
+- **Motion** (Framer Motion) for subtle scroll reveals
+- **Lucide** icons
+- Deploy target: **Vercel** (Hobby/free plan friendly — fully static + a light
+  routing proxy)
+
+## Project structure
+
+```
+app/
+  [locale]/            # Locale-scoped routes (root layout lives here)
+    layout.tsx         # <html dir>, fonts, Header/Footer, per-locale metadata
+    page.tsx           # Home
+    services/          # About / Booking / Contact each in their own folder
+    about/  booking/  contact/
+    not-found.tsx      # Bilingual 404
+  globals.css          # Tailwind v4 theme (brand colors, fonts, RTL, motifs)
+  sitemap.ts  robots.ts
+components/
+  ui/                  # Button, Card, Section, Container, form fields, icons…
+  layout/              # Header, Footer, Logo, LanguageSwitcher, PageHero
+features/
+  home/ services/ booking/ contact/ shared/   # Page-level building blocks
+i18n/
+  config.ts            # locales, direction, names
+  dictionaries.ts      # server-only loader
+  dictionaries/en.json, ar.json                # all site copy
+lib/
+  services.ts          # service catalogue + pricing (structural data)
+  navigation.ts  utils.ts  submit.ts
+types/
+proxy.ts               # Locale routing (Next 16 renamed middleware → proxy)
+Code.gs                # Google Apps Script placeholder for the booking sheet
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Translatable copy lives in `i18n/dictionaries/*.json`; non-translatable service
+data (ids, prices, imagery) lives in `lib/services.ts`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Getting started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+cp .env.example .env.local   # fill in values (see below)
+npm run dev
+```
 
-## Learn More
+Open <http://localhost:3000> — you'll be redirected to `/en` (or `/ar` based on
+your browser's `Accept-Language`).
 
-To learn more about Next.js, take a look at the following resources:
+### Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `npm run dev` — development server
+- `npm run build` — production build
+- `npm run start` — serve the production build
+- `npm run lint` — ESLint
+- `npm run typecheck` — TypeScript, no emit
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment variables
 
-## Deploy on Vercel
+Copy `.env.example` to `.env.local`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Variable | Required | Description |
+| --- | --- | --- |
+| `NEXT_PUBLIC_BOOKING_SCRIPT_URL` | for booking/contact forms | Google Apps Script Web App URL that appends submissions to your Google Sheet |
+| `NEXT_PUBLIC_SITE_URL` | recommended | Public origin (e.g. `https://www.mendlab.eg`) used for `sitemap.xml` / `robots.txt` |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Until `NEXT_PUBLIC_BOOKING_SCRIPT_URL` is set, the forms validate and show a
+clear "not connected yet" message instead of silently failing.
+
+## Connecting the booking + contact forms to Google Sheets
+
+The site has **no backend** — form submissions are appended to a Google Sheet via
+a Google Apps Script Web App. There is no payment processing and no auth; this is
+a lead-capture form only.
+
+1. **Create a Google Sheet** (any name). Copy its ID from the URL:
+   `https://docs.google.com/spreadsheets/d/`**`<SHEET_ID>`**`/edit`.
+2. In the Sheet, open **Extensions → Apps Script**.
+3. Delete the default code and paste the contents of [`Code.gs`](Code.gs).
+   Optionally set `SHEET_ID` (leave blank to use the bound sheet).
+4. **Deploy → New deployment → Web app**:
+   - **Execute as:** Me
+   - **Who has access:** Anyone
+   - Authorize when prompted.
+5. Copy the **Web App URL** and set it as `NEXT_PUBLIC_BOOKING_SCRIPT_URL` in
+   `.env.local` (and in Vercel's env settings for production).
+
+The script auto-creates two tabs — **Bookings** and **Contacts** — and writes a
+header row on first use. Bookings and contact messages are distinguished by the
+`type` field sent from the site.
+
+> **Note on CORS:** Apps Script Web Apps don't return CORS headers, so the site
+> posts a "simple" request (`text/plain`) using `mode: "no-cors"`. The response
+> is opaque, so the UI treats a completed request as success. This is the
+> standard, reliable pattern for Apps Script from the browser.
+
+## Adding real images & logo
+
+Everywhere a photo will go, the UI currently renders a branded gradient
+placeholder, so the site looks finished without any assets.
+
+- **Photos:** drop files into [`public/images/`](public/images/) using the
+  filenames listed in [`public/images/README.md`](public/images/README.md), then
+  pass `hasImage` at the relevant `<ImagePlaceholder>` call site to switch to the
+  real photo. Service image paths are defined in `lib/services.ts`.
+- **Logo:** replace [`public/logo/logo.svg`](public/logo/logo.svg). The header
+  currently uses an inline SVG lockup in `components/layout/Logo.tsx` — swap it
+  for an `<Image src="/logo/logo.svg" …>` when the final logo is ready.
+
+## Editing content & translations
+
+All copy is in [`i18n/dictionaries/en.json`](i18n/dictionaries/en.json) and
+[`ar.json`](i18n/dictionaries/ar.json). Keep the two files structurally
+identical. Pricing tiers live in `lib/services.ts`.
+
+## Deploying to Vercel
+
+1. Push this repo to GitHub/GitLab/Bitbucket.
+2. Import the project at <https://vercel.com/new>. Framework preset: **Next.js**
+   (auto-detected). No build config changes needed.
+3. Add the environment variables (`NEXT_PUBLIC_BOOKING_SCRIPT_URL`,
+   `NEXT_PUBLIC_SITE_URL`) under **Settings → Environment Variables**.
+4. Deploy. `sitemap.xml` and `robots.txt` are generated automatically.
+
+## Accessibility & SEO
+
+- Semantic landmarks, ARIA labels, keyboard-navigable menu and forms
+- `prefers-reduced-motion` respected (animations disabled)
+- Per-locale `<title>`, meta description, and Open Graph tags; `hreflang`
+  alternates in the sitemap; RTL-correct layout for Arabic
+
+---
+
+_Mend Lab provides wellness and recovery services and is not a substitute for
+medical advice._
