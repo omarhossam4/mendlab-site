@@ -1,18 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-import {
-  bookableOptions,
-  getServiceCopy,
-  type BookableOption,
-} from "@/lib/services";
+import { services, getServiceCopy, type PriceTier } from "@/lib/services";
 import { cn, formatPrice } from "@/lib/utils";
 import { submitToSheet } from "@/lib/submit";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { ServiceIcon } from "@/components/ui/ServiceIcon";
 import {
   FieldError,
   Label,
@@ -23,7 +26,8 @@ import {
 type Status = "idle" | "submitting" | "success" | "error";
 
 interface FormState {
-  option: string;
+  serviceId: string;
+  tierId: PriceTier["id"] | "";
   date: string;
   time: string;
   name: string;
@@ -33,7 +37,8 @@ interface FormState {
 }
 
 const emptyForm: FormState = {
-  option: "",
+  serviceId: "",
+  tierId: "",
   date: "",
   time: "",
   name: "",
@@ -59,30 +64,41 @@ export function BookingForm({
   const [status, setStatus] = useState<Status>("idle");
   const [submitError, setSubmitError] = useState<string>("");
 
-  const optionLabel = useMemo(() => {
-    return (opt: BookableOption) => {
-      const name = getServiceCopy(dict, opt.serviceId).name;
-      if (opt.tierId) {
-        const price = opt.priceEGP
-          ? ` — ${formatPrice(opt.priceEGP, locale)} ${dict.common.egp}`
-          : "";
-        return `${name} · ${dict.services.tiers[opt.tierId]}${price}`;
-      }
-      return name;
-    };
-  }, [dict, locale]);
-
   const steps = [t.steps.service, t.steps.schedule, t.steps.details];
   const today = new Date().toISOString().split("T")[0];
+
+  const selectedService = useMemo(
+    () => services.find((s) => s.id === form.serviceId),
+    [form.serviceId],
+  );
+  const selectedTier = selectedService?.tiers?.find((x) => x.id === form.tierId);
+
+  const selectionLabel = useMemo(() => {
+    if (!selectedService) return "";
+    const name = getServiceCopy(dict, selectedService.id).name;
+    if (selectedService.tiers && form.tierId) {
+      return `${name} · ${dict.services.tiers[form.tierId as PriceTier["id"]]}`;
+    }
+    return name;
+  }, [selectedService, form.tierId, dict]);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
   }
 
+  function chooseService(id: string) {
+    setForm((f) => ({ ...f, serviceId: id, tierId: "" }));
+    setErrors((e) => ({ ...e, serviceId: undefined, tierId: undefined }));
+  }
+
   function validateStep(current: number): boolean {
     const next: Partial<Record<keyof FormState, string>> = {};
-    if (current === 0 && !form.option) next.option = t.errors.service;
+    if (current === 0) {
+      if (!form.serviceId) next.serviceId = t.errors.service;
+      else if (selectedService?.tiers && !form.tierId)
+        next.tierId = t.errors.service;
+    }
     if (current === 1) {
       if (!form.date) next.date = t.errors.date;
       if (!form.time) next.time = t.errors.time;
@@ -110,14 +126,12 @@ export function BookingForm({
     setStatus("submitting");
     setSubmitError("");
 
-    const selected = bookableOptions.find((o) => o.value === form.option);
-    const serviceName = selected
-      ? optionLabel(selected)
-      : form.option;
-
     const result = await submitToSheet("booking", {
-      service: serviceName,
-      serviceValue: form.option,
+      service: selectionLabel,
+      serviceValue: selectedTier
+        ? `${form.serviceId}:${form.tierId}`
+        : form.serviceId,
+      price: selectedTier ? `${selectedTier.priceEGP} EGP` : "",
       date: form.date,
       time: form.time,
       name: form.name,
@@ -149,22 +163,30 @@ export function BookingForm({
 
   if (status === "success") {
     return (
-      <Card className="mx-auto max-w-xl text-center">
+      <div className="mx-auto max-w-xl rounded-3xl border border-primary-100 bg-surface p-8 text-center shadow-[var(--shadow-card)] sm:p-10">
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-50 text-accent">
           <CheckCircle2 className="h-9 w-9" />
         </span>
         <h2 className="mt-5 text-2xl font-bold text-text-dark">
           {t.success.title}
         </h2>
-        <p className="mt-3 leading-relaxed text-text-dark/70">
-          {t.success.body}
-        </p>
+        <p className="mt-3 leading-relaxed text-text-dark/70">{t.success.body}</p>
+        <div className="mt-6 rounded-2xl bg-primary-50/60 p-4 text-start text-sm">
+          <SummaryRows
+            dict={dict}
+            locale={locale}
+            selectionLabel={selectionLabel}
+            price={selectedTier?.priceEGP}
+            date={form.date}
+            time={form.time}
+          />
+        </div>
         <div className="mt-7">
           <Button onClick={reset} variant="outline">
             {t.success.again}
           </Button>
         </div>
-      </Card>
+      </div>
     );
   }
 
@@ -172,119 +194,216 @@ export function BookingForm({
   const ArrowBwd = isRtl ? ArrowRight : ArrowLeft;
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-3xl">
       {/* Step indicator */}
-      <ol className="mb-8 flex items-center gap-2">
+      <ol className="mb-8 flex items-center">
         {steps.map((label, i) => (
-          <li key={label} className="flex flex-1 items-center gap-2">
-            <div
-              className={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors",
-                i < step
-                  ? "bg-accent text-white"
-                  : i === step
-                    ? "bg-primary-dark text-white"
-                    : "bg-primary-100 text-text-dark/50",
-              )}
-            >
-              {i < step ? <Check className="h-4 w-4" /> : i + 1}
+          <li
+            key={label}
+            className={cn("flex items-center", i < steps.length - 1 && "flex-1")}
+          >
+            <div className="flex items-center gap-2.5">
+              <div
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors",
+                  i < step
+                    ? "bg-accent text-white"
+                    : i === step
+                      ? "bg-primary-dark text-white ring-4 ring-primary-100"
+                      : "bg-primary-100 text-text-dark/50",
+                )}
+              >
+                {i < step ? <Check className="h-4 w-4" /> : i + 1}
+              </div>
+              <span
+                className={cn(
+                  "hidden text-sm font-semibold sm:block",
+                  i === step ? "text-text-dark" : "text-text-dark/50",
+                )}
+              >
+                {label}
+              </span>
             </div>
-            <span
-              className={cn(
-                "hidden text-sm font-medium sm:block",
-                i === step ? "text-text-dark" : "text-text-dark/50",
-              )}
-            >
-              {label}
-            </span>
             {i < steps.length - 1 ? (
-              <span className="mx-1 hidden h-px flex-1 bg-primary-100 sm:block" />
+              <span
+                className={cn(
+                  "mx-2 h-0.5 flex-1 rounded-full sm:mx-4",
+                  i < step ? "bg-accent" : "bg-primary-100",
+                )}
+              />
             ) : null}
           </li>
         ))}
       </ol>
 
-      <p className="mb-4 text-sm text-text-dark/60 sm:hidden">
-        {t.stepLabel} {step + 1} {t.of} {steps.length}
+      <p className="mb-4 text-sm font-medium text-text-dark/60 sm:hidden">
+        {t.stepLabel} {step + 1} {t.of} {steps.length} — {steps[step]}
       </p>
 
-      <Card>
+      <div className="rounded-3xl border border-primary-100 bg-surface p-5 shadow-[var(--shadow-card)] sm:p-8">
         <form onSubmit={handleSubmit} noValidate>
           {/* Step 1: Service */}
           {step === 0 ? (
-            <fieldset>
-              <legend className="mb-4 text-lg font-semibold text-text-dark">
+            <div>
+              <h2 className="mb-5 text-lg font-semibold text-text-dark sm:text-xl">
                 {t.selectServicePrompt}
-              </legend>
-              <div className="grid gap-2.5">
-                {bookableOptions.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className={cn(
-                      "flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm transition-colors",
-                      form.option === opt.value
-                        ? "border-accent bg-primary-50/60 ring-1 ring-accent"
-                        : "border-primary-100 hover:border-primary-200",
-                    )}
-                  >
-                    <span className="font-medium text-text-dark">
-                      {optionLabel(opt)}
-                    </span>
-                    <input
-                      type="radio"
-                      name="option"
-                      value={opt.value}
-                      checked={form.option === opt.value}
-                      onChange={(e) => update("option", e.target.value)}
-                      className="h-4 w-4 accent-[var(--color-accent)]"
-                    />
-                  </label>
-                ))}
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {services.map((service) => {
+                  const copy = getServiceCopy(dict, service.id);
+                  const active = form.serviceId === service.id;
+                  const from = service.tiers?.[0]?.priceEGP;
+                  return (
+                    <button
+                      key={service.id}
+                      type="button"
+                      onClick={() => chooseService(service.id)}
+                      aria-pressed={active}
+                      className={cn(
+                        "flex items-start gap-3.5 rounded-2xl border p-4 text-start transition-all",
+                        active
+                          ? "border-accent bg-primary-50/60 ring-1 ring-accent"
+                          : "border-primary-100 hover:border-primary-200 hover:bg-primary-50/30",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors",
+                          active
+                            ? "bg-primary text-white"
+                            : "bg-primary-50 text-primary",
+                        )}
+                      >
+                        <ServiceIcon name={service.icon} className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-text-dark">
+                            {copy.name}
+                          </span>
+                          {active ? (
+                            <Check className="h-4 w-4 shrink-0 text-accent" />
+                          ) : null}
+                        </span>
+                        <span className="mt-0.5 block text-xs leading-relaxed text-text-dark/60">
+                          {copy.short}
+                        </span>
+                        {from ? (
+                          <span className="mt-1.5 inline-block text-xs font-semibold text-accent">
+                            {dict.common.from} {formatPrice(from, locale)}{" "}
+                            {dict.common.egp}
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
-              <FieldError message={errors.option} />
-            </fieldset>
+              <FieldError message={errors.serviceId} />
+
+              {/* Tier selector for session packages */}
+              {selectedService?.tiers ? (
+                <div className="mt-5 rounded-2xl bg-primary-50/50 p-4">
+                  <p className="mb-3 text-sm font-semibold text-text-dark">
+                    {getServiceCopy(dict, selectedService.id).name}
+                  </p>
+                  <div className="grid gap-2.5 sm:grid-cols-3">
+                    {selectedService.tiers.map((tier) => {
+                      const active = form.tierId === tier.id;
+                      return (
+                        <button
+                          key={tier.id}
+                          type="button"
+                          onClick={() => update("tierId", tier.id)}
+                          aria-pressed={active}
+                          className={cn(
+                            "rounded-xl border p-3 text-center transition-all",
+                            active
+                              ? "border-accent bg-surface ring-1 ring-accent"
+                              : "border-primary-100 bg-surface/60 hover:border-primary-200",
+                          )}
+                        >
+                          <span className="block text-sm font-semibold text-text-dark">
+                            {dict.services.tiers[tier.id]}
+                          </span>
+                          <span className="mt-1 block text-sm font-bold text-primary">
+                            {formatPrice(tier.priceEGP, locale)}{" "}
+                            <span className="text-xs font-medium text-text-dark/60">
+                              {dict.common.egp}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <FieldError message={errors.tierId} />
+                  <p className="mt-3 text-xs text-text-dark/55">
+                    {dict.services.priceNote}
+                  </p>
+                </div>
+              ) : null}
+            </div>
           ) : null}
 
           {/* Step 2: Schedule */}
           {step === 1 ? (
-            <fieldset>
-              <legend className="mb-4 text-lg font-semibold text-text-dark">
+            <div>
+              <h2 className="mb-5 text-lg font-semibold text-text-dark sm:text-xl">
                 {t.schedulePrompt}
-              </legend>
+              </h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="date">{t.fields.date}</Label>
-                  <TextInput
-                    id="date"
-                    type="date"
-                    min={today}
-                    value={form.date}
-                    error={!!errors.date}
-                    onChange={(e) => update("date", e.target.value)}
-                  />
+                  <div className="relative">
+                    <CalendarDays className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-text-dark/40 ltr:left-3.5 rtl:right-3.5" />
+                    <TextInput
+                      id="date"
+                      type="date"
+                      min={today}
+                      value={form.date}
+                      error={!!errors.date}
+                      onChange={(e) => update("date", e.target.value)}
+                      className="ltr:pl-10 rtl:pr-10"
+                    />
+                  </div>
                   <FieldError message={errors.date} />
                 </div>
                 <div>
                   <Label htmlFor="time">{t.fields.time}</Label>
-                  <TextInput
-                    id="time"
-                    type="time"
-                    value={form.time}
-                    error={!!errors.time}
-                    onChange={(e) => update("time", e.target.value)}
-                  />
+                  <div className="relative">
+                    <Clock className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-text-dark/40 ltr:left-3.5 rtl:right-3.5" />
+                    <TextInput
+                      id="time"
+                      type="time"
+                      value={form.time}
+                      error={!!errors.time}
+                      onChange={(e) => update("time", e.target.value)}
+                      className="ltr:pl-10 rtl:pr-10"
+                    />
+                  </div>
                   <FieldError message={errors.time} />
                 </div>
               </div>
-            </fieldset>
+
+              {selectionLabel ? (
+                <div className="mt-6 rounded-2xl bg-primary-50/50 p-4 text-sm">
+                  <SummaryRows
+                    dict={dict}
+                    locale={locale}
+                    selectionLabel={selectionLabel}
+                    price={selectedTier?.priceEGP}
+                  />
+                </div>
+              ) : null}
+            </div>
           ) : null}
 
           {/* Step 3: Details */}
           {step === 2 ? (
-            <fieldset>
-              <legend className="mb-4 text-lg font-semibold text-text-dark">
+            <div>
+              <h2 className="mb-5 text-lg font-semibold text-text-dark sm:text-xl">
                 {t.detailsPrompt}
-              </legend>
+              </h2>
               <div className="grid gap-4">
                 <div>
                   <Label htmlFor="name">{t.fields.name}</Label>
@@ -304,10 +423,12 @@ export function BookingForm({
                       id="phone"
                       type="tel"
                       dir="ltr"
+                      inputMode="tel"
                       autoComplete="tel"
                       value={form.phone}
                       error={!!errors.phone}
                       onChange={(e) => update("phone", e.target.value)}
+                      className={isRtl ? "text-right" : undefined}
                     />
                     <FieldError message={errors.phone} />
                   </div>
@@ -317,10 +438,12 @@ export function BookingForm({
                       id="email"
                       type="email"
                       dir="ltr"
+                      inputMode="email"
                       autoComplete="email"
                       value={form.email}
                       error={!!errors.email}
                       onChange={(e) => update("email", e.target.value)}
+                      className={isRtl ? "text-right" : undefined}
                     />
                     <FieldError message={errors.email} />
                   </div>
@@ -338,6 +461,21 @@ export function BookingForm({
                 </div>
               </div>
 
+              {/* Review summary */}
+              <div className="mt-6 rounded-2xl border border-primary-100 bg-primary-50/40 p-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-accent">
+                  {t.summary}
+                </p>
+                <SummaryRows
+                  dict={dict}
+                  locale={locale}
+                  selectionLabel={selectionLabel}
+                  price={selectedTier?.priceEGP}
+                  date={form.date}
+                  time={form.time}
+                />
+              </div>
+
               {submitError ? (
                 <p
                   className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
@@ -346,7 +484,7 @@ export function BookingForm({
                   {submitError}
                 </p>
               ) : null}
-            </fieldset>
+            </div>
           ) : null}
 
           {/* Navigation */}
@@ -372,7 +510,46 @@ export function BookingForm({
             )}
           </div>
         </form>
-      </Card>
+      </div>
     </div>
+  );
+}
+
+/** Compact key/value summary of the current selection. */
+function SummaryRows({
+  dict,
+  locale,
+  selectionLabel,
+  price,
+  date,
+  time,
+}: {
+  dict: Dictionary;
+  locale: Locale;
+  selectionLabel: string;
+  price?: number;
+  date?: string;
+  time?: string;
+}) {
+  const rows: { label: string; value: string }[] = [];
+  if (selectionLabel)
+    rows.push({ label: dict.booking.steps.service, value: selectionLabel });
+  if (price)
+    rows.push({
+      label: dict.services.pricingLabel,
+      value: `${formatPrice(price, locale)} ${dict.common.egp}`,
+    });
+  if (date) rows.push({ label: dict.booking.fields.date, value: date });
+  if (time) rows.push({ label: dict.booking.fields.time, value: time });
+
+  return (
+    <dl className="divide-y divide-primary-100">
+      {rows.map((row) => (
+        <div key={row.label} className="flex items-center justify-between gap-4 py-1.5">
+          <dt className="text-text-dark/60">{row.label}</dt>
+          <dd className="text-end font-semibold text-text-dark">{row.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

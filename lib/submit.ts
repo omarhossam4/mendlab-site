@@ -1,40 +1,40 @@
 /**
- * Posts a payload to the Google Apps Script Web App that appends a row to the
- * connected Google Sheet.
- *
- * Apps Script Web Apps do not return CORS headers, so we send a "simple" request
- * (text/plain, no custom headers) and use `no-cors`. The response is opaque —
- * we treat a resolved fetch as success and a thrown error as failure. The Apps
- * Script (see Code.gs) parses `e.postData.contents` as JSON.
+ * Sends a booking or contact submission to our own server route
+ * (`/api/submit`), which forwards it to the Google Apps Script Web App and
+ * returns a real success/failure result. Same-origin, so there are no CORS or
+ * opaque-response problems in the browser.
  */
 export type SubmissionType = "booking" | "contact";
 
 export interface SubmissionResult {
   ok: boolean;
-  reason?: "not-configured" | "network";
+  reason?: "not-configured" | "network" | "upstream" | "bad-request";
 }
 
 export async function submitToSheet(
   type: SubmissionType,
   data: Record<string, string>,
 ): Promise<SubmissionResult> {
-  const url = process.env.NEXT_PUBLIC_BOOKING_SCRIPT_URL;
-  if (!url) {
-    return { ok: false, reason: "not-configured" };
-  }
-
   try {
-    await fetch(url, {
+    const res = await fetch("/api/submit", {
       method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         type,
         submittedAt: new Date().toISOString(),
         ...data,
       }),
     });
-    return { ok: true };
+
+    if (res.status === 503) {
+      return { ok: false, reason: "not-configured" };
+    }
+
+    const result = (await res.json().catch(() => null)) as SubmissionResult | null;
+    if (res.ok && result?.ok) {
+      return { ok: true };
+    }
+    return { ok: false, reason: result?.reason ?? "network" };
   } catch {
     return { ok: false, reason: "network" };
   }

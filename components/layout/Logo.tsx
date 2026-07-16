@@ -25,7 +25,10 @@ export function Logo({
   variant?: "dark" | "light";
 }) {
   const [failed, setFailed] = useState(false);
-  const src = variant === "light" ? "/logo/logo-white.svg" : "/logo/logo.svg";
+  // Dark variant (light backgrounds) uses the real transparent PNG logo.
+  // Light variant (dark footer) uses a white version — drop /logo/logo-white.svg
+  // (or .png) to replace the inline white wordmark fallback.
+  const src = variant === "light" ? "/logo/logo-white.svg" : "/logo/logo.png";
   const textColor = variant === "light" ? "text-white" : "text-primary-dark";
   const markColor = variant === "light" ? "#ffffff" : "#0A4A55";
 
@@ -39,10 +42,10 @@ export function Logo({
         <Image
           src={src}
           alt="Mend Lab"
-          width={150}
-          height={42}
+          width={293}
+          height={160}
           priority
-          className="h-9 w-auto"
+          className="h-10 w-auto sm:h-11"
           onError={() => setFailed(true)}
         />
       ) : (

@@ -9,7 +9,7 @@ the layout always looks finished.
 
 | Filename | Used on | Suggested size |
 | --- | --- | --- |
-| `hero-image.jpg` | Home hero | 1000×1250 (4:5 portrait) |
+| `hero-image.jpg` | Home hero | 1600×900 (16:9 landscape) |
 | `mission-image.jpg` | Home mission section | 1200×900 (4:3) |
 | `about-clinic.jpg` | About page story | 1200×900 (4:3) |
 | `leadership-ahmed-hosny.jpg` | About page leadership | 600×600 (square) |

@@ -35,6 +35,7 @@ export function Hero({ locale, dict }: LocalizedProps) {
                   href={localeHref(locale, "/booking")}
                   variant="primary"
                   size="lg"
+                  className="w-full sm:w-auto"
                 >
                   {t.primaryCta}
                   <ArrowRight className={cn("h-5 w-5", isRtl && "rotate-180")} />
@@ -43,6 +44,7 @@ export function Hero({ locale, dict }: LocalizedProps) {
                   href={localeHref(locale, "/services")}
                   variant="outline"
                   size="lg"
+                  className="w-full sm:w-auto"
                 >
                   {t.secondaryCta}
                 </Button>
@@ -50,12 +52,12 @@ export function Hero({ locale, dict }: LocalizedProps) {
             </div>
           </Reveal>
 
-          <Reveal delay={0.15} className="hidden lg:block">
+          <Reveal delay={0.15}>
             <ImagePlaceholder
               src="/images/hero-image.jpg"
               alt={dict.meta.siteName}
               label={dict.meta.tagline}
-              className="aspect-[4/5] rounded-3xl shadow-[var(--shadow-soft)] ring-1 ring-primary-100"
+              className="aspect-video rounded-3xl shadow-[var(--shadow-soft)] ring-1 ring-primary-100"
               priority
             />
           </Reveal>

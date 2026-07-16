@@ -75,7 +75,8 @@ export const services: Service[] = [
     slug: "recovery-sessions",
     category: "session",
     icon: "activity",
-    image: "/images/service-recovery-sessions.jpg",
+    // Reuses the recovery-massage photo until a dedicated session photo is added.
+    image: "/images/service-recovery-massage.jpg",
     tiers: SESSION_TIERS,
   },
   {
@@ -83,7 +84,8 @@ export const services: Service[] = [
     slug: "cupping-sessions",
     category: "session",
     icon: "layers",
-    image: "/images/service-cupping-sessions.jpg",
+    // Reuses the dry-cupping photo until a dedicated session photo is added.
+    image: "/images/service-dry-cupping.jpg",
     tiers: SESSION_TIERS,
   },
 ];

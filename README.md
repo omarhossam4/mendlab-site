@@ -73,17 +73,25 @@ Copy `.env.example` to `.env.local`:
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `NEXT_PUBLIC_BOOKING_SCRIPT_URL` | for booking/contact forms | Google Apps Script Web App URL that appends submissions to your Google Sheet |
+| `BOOKING_SCRIPT_URL` | for booking/contact forms | Google Apps Script Web App URL that appends submissions to your Google Sheet (server-only) |
 | `NEXT_PUBLIC_SITE_URL` | recommended | Public origin (e.g. `https://www.mendlab.eg`) used for `sitemap.xml` / `robots.txt` |
 
-Until `NEXT_PUBLIC_BOOKING_SCRIPT_URL` is set, the forms validate and show a
-clear "not connected yet" message instead of silently failing.
+Until `BOOKING_SCRIPT_URL` is set, the forms validate and show a clear
+"not connected yet" message instead of silently failing.
+
+> **After editing `.env.local` you must restart the dev server** (`Ctrl+C`, then
+> `npm run dev`). Next.js only reads env files at startup.
 
 ## Connecting the booking + contact forms to Google Sheets
 
-The site has **no backend** — form submissions are appended to a Google Sheet via
-a Google Apps Script Web App. There is no payment processing and no auth; this is
-a lead-capture form only.
+The site has **no database** — form submissions are appended to a Google Sheet
+via a Google Apps Script Web App. There is no payment processing and no auth;
+this is a lead-capture form only.
+
+**How it flows:** browser → `/api/submit` (this app's server route) → Apps Script
+→ Google Sheet. Posting from our own server (instead of the browser) means there
+are no CORS problems and the app gets a **real success/failure response** back,
+so errors are actually visible.
 
 1. **Create a Google Sheet** (any name). Copy its ID from the URL:
    `https://docs.google.com/spreadsheets/d/`**`<SHEET_ID>`**`/edit`.
@@ -92,19 +100,27 @@ a lead-capture form only.
    Optionally set `SHEET_ID` (leave blank to use the bound sheet).
 4. **Deploy → New deployment → Web app**:
    - **Execute as:** Me
-   - **Who has access:** Anyone
+   - **Who has access:** Anyone (this is required — otherwise the server gets an
+     HTML login page instead of your script)
    - Authorize when prompted.
-5. Copy the **Web App URL** and set it as `NEXT_PUBLIC_BOOKING_SCRIPT_URL` in
-   `.env.local` (and in Vercel's env settings for production).
+5. Copy the **Web App URL** (it ends in `/exec`) and set it as
+   `BOOKING_SCRIPT_URL` in `.env.local` (and in Vercel's env settings for
+   production). **Restart the dev server** after editing `.env.local`.
+6. Test: open **/en/booking**, complete a booking, and confirm a new row appears
+   in the **Bookings** tab.
 
 The script auto-creates two tabs — **Bookings** and **Contacts** — and writes a
 header row on first use. Bookings and contact messages are distinguished by the
 `type` field sent from the site.
 
-> **Note on CORS:** Apps Script Web Apps don't return CORS headers, so the site
-> posts a "simple" request (`text/plain`) using `mode: "no-cors"`. The response
-> is opaque, so the UI treats a completed request as success. This is the
-> standard, reliable pattern for Apps Script from the browser.
+**Troubleshooting**
+
+- _"Booking is not connected yet"_ → `BOOKING_SCRIPT_URL` is empty or the dev
+  server wasn't restarted after editing `.env.local`.
+- _Submission fails / no row appears_ → re-deploy the Apps Script with **Who has
+  access: Anyone**, and make sure you copied the `…/exec` URL (not `…/dev`).
+- You can sanity-check the URL by opening it in a browser — it should return
+  `{"ok":true,"service":"Mend Lab submissions endpoint"}`.
 
 ## Adding real images & logo
 
