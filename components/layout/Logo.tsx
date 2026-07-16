@@ -36,16 +36,16 @@ export function Logo({
     <Link
       href={localeHref(locale, "/")}
       className={`group inline-flex items-center gap-2.5 ${className ?? ""}`}
-      aria-label="Mend Lab home"
+      aria-label="MendLab home"
     >
       {!failed ? (
         <Image
           src={src}
-          alt="Mend Lab"
+          alt="MendLab"
           width={293}
           height={160}
           priority
-          className="h-12 w-auto sm:h-14"
+          className="h-14 w-auto sm:h-16 lg:h-[4.5rem]"
           onError={() => setFailed(true)}
         />
       ) : (

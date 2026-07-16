@@ -3,13 +3,12 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getServiceCopy, type Service } from "@/lib/services";
 import { cn, formatPrice, localeHref } from "@/lib/utils";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { ServiceIcon } from "@/components/ui/ServiceIcon";
 import { Reveal } from "@/components/ui/Reveal";
 
-/** Full service section: overview, how-it-works, benefits, and pricing. */
+/** Full service section: overview, how-it-works, benefits, and price. */
 export function ServiceDetail({
   service,
   dict,
@@ -29,7 +28,7 @@ export function ServiceDetail({
     <Reveal>
       <article
         id={service.slug}
-        className="scroll-mt-24 border-t border-primary-100/60 py-14 first:border-t-0"
+        className="scroll-mt-28 border-t border-primary-100/60 py-14 first:border-t-0"
       >
         <div
           className={cn(
@@ -47,14 +46,23 @@ export function ServiceDetail({
 
           {/* Copy */}
           <div>
-            <div className="mb-4 flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary">
-                <ServiceIcon name={service.icon} className="h-5 w-5" />
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary">
+                  <ServiceIcon name={service.icon} className="h-5 w-5" />
+                </span>
+                <h3 className="text-2xl font-bold text-text-dark sm:text-3xl">
+                  {item.name}
+                </h3>
+              </div>
+              <span className="rounded-full bg-primary-dark px-4 py-1.5 text-lg font-bold text-white">
+                {formatPrice(service.priceEGP, locale)}{" "}
+                <span className="text-xs font-medium text-white/70">
+                  {dict.common.egp}
+                </span>
               </span>
-              <h2 className="text-2xl font-bold text-text-dark sm:text-3xl">
-                {item.name}
-              </h2>
             </div>
+
             <p className="text-base leading-relaxed text-text-dark/75">
               {item.description}
             </p>
@@ -62,9 +70,9 @@ export function ServiceDetail({
             <div className="mt-7 grid gap-6 sm:grid-cols-2">
               {/* How it works */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-accent">
+                <h4 className="text-sm font-semibold uppercase tracking-wider text-accent">
                   {t.howItWorksLabel}
-                </h3>
+                </h4>
                 <ol className="mt-3 space-y-2.5">
                   {item.howItWorks.map((step, i) => (
                     <li key={i} className="flex gap-3 text-sm text-text-dark/75">
@@ -79,9 +87,9 @@ export function ServiceDetail({
 
               {/* Benefits */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-accent">
+                <h4 className="text-sm font-semibold uppercase tracking-wider text-accent">
                   {t.benefitsLabel}
-                </h3>
+                </h4>
                 <ul className="mt-3 space-y-2.5">
                   {item.benefits.map((benefit, i) => (
                     <li key={i} className="flex gap-3 text-sm text-text-dark/75">
@@ -93,32 +101,9 @@ export function ServiceDetail({
               </div>
             </div>
 
-            {/* Pricing (session packages) */}
-            {service.tiers ? (
-              <Card className="mt-7 bg-primary-50/50 p-5">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-accent">
-                  {t.pricingLabel}
-                </h3>
-                <dl className="mt-3 divide-y divide-primary-100">
-                  {service.tiers.map((tier) => (
-                    <div
-                      key={tier.id}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <dt className="text-sm text-text-dark/80">
-                        {t.tiers[tier.id]}
-                      </dt>
-                      <dd className="text-sm font-semibold text-primary-dark">
-                        {formatPrice(tier.priceEGP, locale)} {dict.common.egp}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-                <p className="mt-3 text-xs text-text-dark/55">{t.priceNote}</p>
-              </Card>
-            ) : null}
+            <p className="mt-6 text-xs text-text-dark/55">{t.priceNote}</p>
 
-            <div className="mt-7">
+            <div className="mt-5">
               <Button href={localeHref(locale, "/booking")} variant="primary">
                 {t.bookThis}
               </Button>

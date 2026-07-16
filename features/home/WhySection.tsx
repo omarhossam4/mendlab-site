@@ -14,7 +14,7 @@ import { Section, SectionHeading } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
 import { Reveal } from "@/components/ui/Reveal";
 
-// One icon per "Why Choose Mend Lab" highlight, in order.
+// One icon per "Why Choose MendLab" highlight, in order.
 const icons: LucideIcon[] = [
   FlaskConical,
   Dumbbell,

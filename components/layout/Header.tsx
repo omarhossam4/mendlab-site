@@ -27,7 +27,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <header className="sticky top-0 z-50 border-b border-primary-100 bg-surface/95 text-text-dark backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <Container>
-        <div className="flex h-16 items-center justify-between gap-4 sm:h-20">
+        <div className="flex h-20 items-center justify-between gap-4 sm:h-24">
           <Logo locale={locale} variant="dark" />
 
           <nav

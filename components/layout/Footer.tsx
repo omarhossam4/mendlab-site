@@ -2,12 +2,12 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { getNavLinks, socialLinks } from "@/lib/navigation";
+import { getNavLinks, socialLinks, contactDetails } from "@/lib/navigation";
 import { localeHref } from "@/lib/utils";
-import { services, getServiceCopy } from "@/lib/services";
+import { services, getServiceFullName } from "@/lib/services";
 import { Container } from "@/components/ui/Container";
 import { Logo } from "./Logo";
-import { FacebookIcon, InstagramIcon } from "@/components/ui/SocialIcons";
+import { InstagramIcon, TikTokIcon } from "@/components/ui/SocialIcons";
 
 export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const navLinks = getNavLinks(dict);
@@ -25,15 +25,6 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             </p>
             <div className="mt-5 flex items-center gap-3">
               <a
-                href={socialLinks.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
-              >
-                <FacebookIcon className="h-4 w-4 text-white" />
-              </a>
-              <a
                 href={socialLinks.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -41,6 +32,15 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
               >
                 <InstagramIcon className="h-4 w-4 text-white" />
+              </a>
+              <a
+                href={socialLinks.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
+              >
+                <TikTokIcon className="h-4 w-4 text-white" />
               </a>
             </div>
           </div>
@@ -76,7 +76,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                     href={localeHref(locale, `/services#${service.slug}`)}
                     className="text-white/70 transition-colors hover:text-white"
                   >
-                    {getServiceCopy(dict, service.id).name}
+                    {getServiceFullName(dict, service)}
                   </Link>
                 </li>
               ))}
@@ -91,25 +91,32 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <ul className="mt-4 space-y-3 text-sm">
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                <span className="text-white/70">{dict.contact.info.address}</span>
+                <a
+                  href={contactDetails.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/70 transition-colors hover:text-white"
+                >
+                  {dict.contact.info.address}
+                </a>
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                 <a
-                  href="tel:+201012345678"
+                  href={contactDetails.phoneHref}
                   dir="ltr"
                   className="text-white/70 transition-colors hover:text-white"
                 >
-                  {dict.contact.info.phone}
+                  {contactDetails.phoneDisplay}
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                 <a
-                  href={`mailto:${dict.contact.info.email}`}
+                  href={`mailto:${contactDetails.email}`}
                   className="text-white/70 transition-colors hover:text-white"
                 >
-                  {dict.contact.info.email}
+                  {contactDetails.email}
                 </a>
               </li>
             </ul>

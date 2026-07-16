@@ -1,5 +1,8 @@
 /**
- * Service catalogue for Mend Lab.
+ * Service catalogue for MendLab — mirrors the official price list.
+ *
+ * Two categories (Recovery Sessions, Cupping Sessions), each offered for three
+ * body areas, giving the six bookable services.
  *
  * Structural / non-translatable data (ids, slugs, imagery, pricing) lives here.
  * Translatable copy (name, description, "how it works", benefits) lives in the
@@ -8,89 +11,72 @@
 
 import type { Dictionary } from "@/i18n/dictionaries";
 
-export type ServiceCategory = "treatment" | "session";
-
-export interface PriceTier {
-  /** Matches a key in dictionary `services.tiers` for the label. */
-  id: "upper-body" | "lower-body" | "whole-body";
-  priceEGP: number;
-}
+export type ServiceCategory = "recovery" | "cupping";
 
 export interface Service {
   id: string;
   slug: string;
   category: ServiceCategory;
-  /** Lucide-style icon name, mapped in the Icon component. */
+  /** Body-area icon key, mapped in ServiceIcon. */
   icon: string;
-  /** Placeholder image path under /public/images — swap for real photos. */
   image: string;
-  /** Present for session packages that price by body area. */
-  tiers?: PriceTier[];
+  priceEGP: number;
 }
 
-const SESSION_TIERS: PriceTier[] = [
-  { id: "upper-body", priceEGP: 600 },
-  { id: "lower-body", priceEGP: 800 },
-  { id: "whole-body", priceEGP: 1200 },
-];
-
 export const services: Service[] = [
+  // Recovery Sessions
   {
-    id: "dry-cupping",
-    slug: "dry-cupping",
-    category: "treatment",
-    icon: "circle",
-    image: "/images/service-dry-cupping.jpg",
-  },
-  {
-    id: "wet-cupping",
-    slug: "wet-cupping",
-    category: "treatment",
-    icon: "droplet",
-    image: "/images/service-wet-cupping.jpg",
-  },
-  {
-    id: "flash-cupping",
-    slug: "flash-cupping",
-    category: "treatment",
-    icon: "zap",
-    image: "/images/service-flash-cupping.jpg",
-  },
-  {
-    id: "recovery-massage",
-    slug: "recovery-massage",
-    category: "treatment",
-    icon: "hand",
+    id: "recovery-upper-body",
+    slug: "recovery-upper-body",
+    category: "recovery",
+    icon: "upper",
     image: "/images/service-recovery-massage.jpg",
+    priceEGP: 600,
   },
   {
-    id: "dry-needling",
-    slug: "dry-needling",
-    category: "treatment",
-    icon: "needle",
+    id: "recovery-lower-body",
+    slug: "recovery-lower-body",
+    category: "recovery",
+    icon: "lower",
     image: "/images/service-dry-needling.jpg",
+    priceEGP: 800,
   },
   {
-    id: "recovery-sessions",
-    slug: "recovery-sessions",
-    category: "session",
-    icon: "activity",
-    // Reuses the recovery-massage photo until a dedicated session photo is added.
+    id: "recovery-whole-body",
+    slug: "recovery-whole-body",
+    category: "recovery",
+    icon: "whole",
     image: "/images/service-recovery-massage.jpg",
-    tiers: SESSION_TIERS,
+    priceEGP: 1200,
+  },
+  // Cupping Sessions
+  {
+    id: "cupping-upper-body",
+    slug: "cupping-upper-body",
+    category: "cupping",
+    icon: "upper",
+    image: "/images/service-dry-cupping.jpg",
+    priceEGP: 600,
   },
   {
-    id: "cupping-sessions",
-    slug: "cupping-sessions",
-    category: "session",
-    icon: "layers",
-    // Reuses the dry-cupping photo until a dedicated session photo is added.
-    image: "/images/service-dry-cupping.jpg",
-    tiers: SESSION_TIERS,
+    id: "cupping-lower-body",
+    slug: "cupping-lower-body",
+    category: "cupping",
+    icon: "lower",
+    image: "/images/service-wet-cupping.jpg",
+    priceEGP: 800,
+  },
+  {
+    id: "cupping-whole-body",
+    slug: "cupping-whole-body",
+    category: "cupping",
+    icon: "whole",
+    image: "/images/service-flash-cupping.jpg",
+    priceEGP: 1200,
   },
 ];
 
-export const serviceCategories: ServiceCategory[] = ["treatment", "session"];
+export const serviceCategories: ServiceCategory[] = ["recovery", "cupping"];
 
 export function getService(slug: string): Service | undefined {
   return services.find((s) => s.slug === slug);
@@ -106,25 +92,10 @@ export function getServiceCopy(dict: Dictionary, id: string): ServiceCopy {
 }
 
 /**
- * Flat list of individually bookable options for the booking form.
- * Session packages expand into one option per price tier.
+ * Fully-qualified name, e.g. "Recovery Session — Upper Body". Used wherever the
+ * service appears outside its category heading (booking, footer, previews).
  */
-export interface BookableOption {
-  /** Stable value submitted with the booking, e.g. "recovery-sessions:upper-body". */
-  value: string;
-  serviceId: string;
-  tierId?: PriceTier["id"];
-  priceEGP?: number;
+export function getServiceFullName(dict: Dictionary, service: Service): string {
+  const category = dict.services.categories[service.category].name;
+  return `${category} — ${getServiceCopy(dict, service.id).name}`;
 }
-
-export const bookableOptions: BookableOption[] = services.flatMap((service) => {
-  if (service.tiers) {
-    return service.tiers.map((tier) => ({
-      value: `${service.id}:${tier.id}`,
-      serviceId: service.id,
-      tierId: tier.id,
-      priceEGP: tier.priceEGP,
-    }));
-  }
-  return [{ value: service.id, serviceId: service.id }];
-});

@@ -1,5 +1,5 @@
 /**
- * Central locale configuration for Mend Lab.
+ * Central locale configuration for MendLab.
  * The app supports English (LTR) and Arabic (RTL).
  */
 

@@ -11,7 +11,12 @@ import {
 } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { services, getServiceCopy, type PriceTier } from "@/lib/services";
+import {
+  services,
+  serviceCategories,
+  getServiceCopy,
+  getServiceFullName,
+} from "@/lib/services";
 import { cn, formatPrice } from "@/lib/utils";
 import { submitToSheet } from "@/lib/submit";
 import { Button } from "@/components/ui/Button";
@@ -27,7 +32,6 @@ type Status = "idle" | "submitting" | "success" | "error";
 
 interface FormState {
   serviceId: string;
-  tierId: PriceTier["id"] | "";
   date: string;
   time: string;
   name: string;
@@ -38,7 +42,6 @@ interface FormState {
 
 const emptyForm: FormState = {
   serviceId: "",
-  tierId: "",
   date: "",
   time: "",
   name: "",
@@ -71,34 +74,18 @@ export function BookingForm({
     () => services.find((s) => s.id === form.serviceId),
     [form.serviceId],
   );
-  const selectedTier = selectedService?.tiers?.find((x) => x.id === form.tierId);
-
-  const selectionLabel = useMemo(() => {
-    if (!selectedService) return "";
-    const name = getServiceCopy(dict, selectedService.id).name;
-    if (selectedService.tiers && form.tierId) {
-      return `${name} · ${dict.services.tiers[form.tierId as PriceTier["id"]]}`;
-    }
-    return name;
-  }, [selectedService, form.tierId, dict]);
+  const selectionLabel = selectedService
+    ? getServiceFullName(dict, selectedService)
+    : "";
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
   }
 
-  function chooseService(id: string) {
-    setForm((f) => ({ ...f, serviceId: id, tierId: "" }));
-    setErrors((e) => ({ ...e, serviceId: undefined, tierId: undefined }));
-  }
-
   function validateStep(current: number): boolean {
     const next: Partial<Record<keyof FormState, string>> = {};
-    if (current === 0) {
-      if (!form.serviceId) next.serviceId = t.errors.service;
-      else if (selectedService?.tiers && !form.tierId)
-        next.tierId = t.errors.service;
-    }
+    if (current === 0 && !form.serviceId) next.serviceId = t.errors.service;
     if (current === 1) {
       if (!form.date) next.date = t.errors.date;
       if (!form.time) next.time = t.errors.time;
@@ -128,10 +115,8 @@ export function BookingForm({
 
     const result = await submitToSheet("booking", {
       service: selectionLabel,
-      serviceValue: selectedTier
-        ? `${form.serviceId}:${form.tierId}`
-        : form.serviceId,
-      price: selectedTier ? `${selectedTier.priceEGP} EGP` : "",
+      serviceValue: form.serviceId,
+      price: selectedService ? `${selectedService.priceEGP} EGP` : "",
       date: form.date,
       time: form.time,
       name: form.name,
@@ -176,7 +161,7 @@ export function BookingForm({
             dict={dict}
             locale={locale}
             selectionLabel={selectionLabel}
-            price={selectedTier?.priceEGP}
+            price={selectedService?.priceEGP}
             date={form.date}
             time={form.time}
           />
@@ -242,106 +227,76 @@ export function BookingForm({
 
       <div className="rounded-3xl border border-primary-100 bg-surface p-5 shadow-[var(--shadow-card)] sm:p-8">
         <form onSubmit={handleSubmit} noValidate>
-          {/* Step 1: Service */}
+          {/* Step 1: Service — the six price-list sessions, grouped by category */}
           {step === 0 ? (
             <div>
               <h2 className="mb-5 text-lg font-semibold text-text-dark sm:text-xl">
                 {t.selectServicePrompt}
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {services.map((service) => {
-                  const copy = getServiceCopy(dict, service.id);
-                  const active = form.serviceId === service.id;
-                  const from = service.tiers?.[0]?.priceEGP;
-                  return (
-                    <button
-                      key={service.id}
-                      type="button"
-                      onClick={() => chooseService(service.id)}
-                      aria-pressed={active}
-                      className={cn(
-                        "flex items-start gap-3.5 rounded-2xl border p-4 text-start transition-all",
-                        active
-                          ? "border-accent bg-primary-50/60 ring-1 ring-accent"
-                          : "border-primary-100 hover:border-primary-200 hover:bg-primary-50/30",
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors",
-                          active
-                            ? "bg-primary text-white"
-                            : "bg-primary-50 text-primary",
-                        )}
-                      >
-                        <ServiceIcon name={service.icon} className="h-5 w-5" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center justify-between gap-2">
-                          <span className="font-semibold text-text-dark">
-                            {copy.name}
-                          </span>
-                          {active ? (
-                            <Check className="h-4 w-4 shrink-0 text-accent" />
-                          ) : null}
-                        </span>
-                        <span className="mt-0.5 block text-xs leading-relaxed text-text-dark/60">
-                          {copy.short}
-                        </span>
-                        {from ? (
-                          <span className="mt-1.5 inline-block text-xs font-semibold text-accent">
-                            {dict.common.from} {formatPrice(from, locale)}{" "}
-                            {dict.common.egp}
-                          </span>
-                        ) : null}
-                      </span>
-                    </button>
-                  );
-                })}
+
+              <div className="space-y-6">
+                {serviceCategories.map((category) => (
+                  <fieldset key={category}>
+                    <legend className="mb-3 text-sm font-bold uppercase tracking-wider text-accent">
+                      {dict.services.categories[category].name}
+                    </legend>
+                    <div className="grid gap-2.5 sm:grid-cols-3">
+                      {services
+                        .filter((s) => s.category === category)
+                        .map((service) => {
+                          const copy = getServiceCopy(dict, service.id);
+                          const active = form.serviceId === service.id;
+                          return (
+                            <button
+                              key={service.id}
+                              type="button"
+                              onClick={() => update("serviceId", service.id)}
+                              aria-pressed={active}
+                              className={cn(
+                                "rounded-2xl border p-4 text-start transition-all",
+                                active
+                                  ? "border-accent bg-primary-50/60 ring-1 ring-accent"
+                                  : "border-primary-100 hover:border-primary-200 hover:bg-primary-50/30",
+                              )}
+                            >
+                              <span className="flex items-center justify-between gap-2">
+                                <span
+                                  className={cn(
+                                    "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+                                    active
+                                      ? "bg-primary text-white"
+                                      : "bg-primary-50 text-primary",
+                                  )}
+                                >
+                                  <ServiceIcon
+                                    name={service.icon}
+                                    className="h-4 w-4"
+                                  />
+                                </span>
+                                {active ? (
+                                  <Check className="h-4 w-4 text-accent" />
+                                ) : null}
+                              </span>
+                              <span className="mt-3 block font-semibold text-text-dark">
+                                {copy.name}
+                              </span>
+                              <span className="mt-1 block text-lg font-bold text-primary">
+                                {formatPrice(service.priceEGP, locale)}{" "}
+                                <span className="text-xs font-medium text-text-dark/60">
+                                  {dict.common.egp}
+                                </span>
+                              </span>
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </fieldset>
+                ))}
               </div>
               <FieldError message={errors.serviceId} />
-
-              {/* Tier selector for session packages */}
-              {selectedService?.tiers ? (
-                <div className="mt-5 rounded-2xl bg-primary-50/50 p-4">
-                  <p className="mb-3 text-sm font-semibold text-text-dark">
-                    {getServiceCopy(dict, selectedService.id).name}
-                  </p>
-                  <div className="grid gap-2.5 sm:grid-cols-3">
-                    {selectedService.tiers.map((tier) => {
-                      const active = form.tierId === tier.id;
-                      return (
-                        <button
-                          key={tier.id}
-                          type="button"
-                          onClick={() => update("tierId", tier.id)}
-                          aria-pressed={active}
-                          className={cn(
-                            "rounded-xl border p-3 text-center transition-all",
-                            active
-                              ? "border-accent bg-surface ring-1 ring-accent"
-                              : "border-primary-100 bg-surface/60 hover:border-primary-200",
-                          )}
-                        >
-                          <span className="block text-sm font-semibold text-text-dark">
-                            {dict.services.tiers[tier.id]}
-                          </span>
-                          <span className="mt-1 block text-sm font-bold text-primary">
-                            {formatPrice(tier.priceEGP, locale)}{" "}
-                            <span className="text-xs font-medium text-text-dark/60">
-                              {dict.common.egp}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <FieldError message={errors.tierId} />
-                  <p className="mt-3 text-xs text-text-dark/55">
-                    {dict.services.priceNote}
-                  </p>
-                </div>
-              ) : null}
+              <p className="mt-4 text-xs text-text-dark/55">
+                {dict.services.priceNote}
+              </p>
             </div>
           ) : null}
 
@@ -391,7 +346,7 @@ export function BookingForm({
                     dict={dict}
                     locale={locale}
                     selectionLabel={selectionLabel}
-                    price={selectedTier?.priceEGP}
+                    price={selectedService?.priceEGP}
                   />
                 </div>
               ) : null}
@@ -470,7 +425,7 @@ export function BookingForm({
                   dict={dict}
                   locale={locale}
                   selectionLabel={selectionLabel}
-                  price={selectedTier?.priceEGP}
+                  price={selectedService?.priceEGP}
                   date={form.date}
                   time={form.time}
                 />
@@ -545,7 +500,10 @@ function SummaryRows({
   return (
     <dl className="divide-y divide-primary-100">
       {rows.map((row) => (
-        <div key={row.label} className="flex items-center justify-between gap-4 py-1.5">
+        <div
+          key={row.label}
+          className="flex items-center justify-between gap-4 py-1.5"
+        >
           <dt className="text-text-dark/60">{row.label}</dt>
           <dd className="text-end font-semibold text-text-dark">{row.value}</dd>
         </div>

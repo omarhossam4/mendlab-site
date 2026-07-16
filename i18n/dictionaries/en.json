@@ -1,8 +1,8 @@
 {
   "meta": {
-    "siteName": "Mend Lab",
+    "siteName": "MendLab",
     "tagline": "Science-Driven Recovery & Wellness",
-    "description": "Mend Lab is a premier science-driven wellness and physical recovery lab in Cairo, offering advanced recovery protocols, physical rehabilitation, therapeutic massage, cupping therapy (Hijama), and dry needling."
+    "description": "MendLab is a premier science-driven wellness and physical recovery lab in Cairo, offering advanced recovery protocols, physical rehabilitation, therapeutic massage, cupping therapy (Hijama), and dry needling."
   },
   "nav": {
     "home": "Home",
@@ -28,13 +28,22 @@
     "hero": {
       "eyebrow": "Recovery & Wellness — Cairo",
       "title": "Recover Smarter. Perform Better.",
-      "subtitle": "Mend Lab bridges advanced sports science and traditional therapy to optimize your physical restoration, performance, and overall well-being.",
+      "subtitle": "MendLab bridges advanced sports science and traditional therapy to optimize your physical restoration, performance, and overall well-being.",
       "primaryCta": "Book a Session",
       "secondaryCta": "Explore Services",
       "stats": [
-        { "value": "7+", "label": "Recovery Therapies" },
-        { "value": "100%", "label": "Sterile Protocols" },
-        { "value": "1:1", "label": "Personalized Care" }
+        {
+          "value": "7+",
+          "label": "Recovery Therapies"
+        },
+        {
+          "value": "100%",
+          "label": "Sterile Protocols"
+        },
+        {
+          "value": "1:1",
+          "label": "Personalized Care"
+        }
       ]
     },
     "mission": {
@@ -43,8 +52,8 @@
       "body": "To redefine the recovery landscape in Cairo by delivering premium, hygienic, and scientifically backed physical restoration services — while ensuring a comfortable, empowering, and results-driven experience for every client."
     },
     "why": {
-      "eyebrow": "Why Mend Lab",
-      "title": "Why Choose Mend Lab",
+      "eyebrow": "Why MendLab",
+      "title": "Why Choose MendLab",
       "subtitle": "Recovery here is not simply a treatment — it is a structured, evidence-based process designed to help you restore, perform, and thrive.",
       "items": [
         {
@@ -84,169 +93,160 @@
     "servicesPreview": {
       "eyebrow": "What We Offer",
       "title": "Our Services",
-      "subtitle": "Specialized cupping therapy, recovery massage, dry needling, and complete recovery sessions — tailored to you.",
+      "subtitle": "Targeted recovery and traditional cupping sessions — for the upper body, lower body, or whole body.",
       "cta": "View all services"
     },
     "cta": {
       "title": "Ready to feel the difference?",
-      "subtitle": "Book your first session at Mend Lab and start recovering the smart way.",
+      "subtitle": "Book your first session at MendLab and start recovering the smart way.",
       "button": "Book Your Session"
     }
   },
   "services": {
     "eyebrow": "Our Services",
-    "title": "Therapies & Recovery Sessions",
-    "subtitle": "Explore individual treatments or complete recovery packages, each delivered with clinical precision and exceptional hygiene.",
+    "title": "Recovery & Cupping Sessions",
+    "subtitle": "Targeted sessions priced by body area — choose the upper body, lower body, or a full whole-body reset.",
     "categories": {
-      "treatment": "Individual Treatments",
-      "session": "Recovery & Cupping Sessions"
+      "recovery": {
+        "name": "Recovery Sessions",
+        "description": "Targeted recovery sessions to relieve pain, reduce muscle tension, and improve mobility."
+      },
+      "cupping": {
+        "name": "Cupping Sessions",
+        "description": "Traditional cupping therapy to improve circulation, detoxify the body and reduce pain."
+      }
     },
     "howItWorksLabel": "How It Works",
     "benefitsLabel": "Benefits",
-    "pricingLabel": "Pricing",
-    "priceNote": "Prices may vary depending on duration and treatment plan.",
-    "bookThis": "Book this service",
-    "tiers": {
-      "upper-body": "Upper Body",
-      "lower-body": "Lower Body",
-      "whole-body": "Whole Body"
-    },
+    "pricingLabel": "Price",
+    "priceNote": "Prices may vary depending on the duration and specific treatment plan.",
+    "noteLabel": "Please note",
+    "note": "Our sessions are customized to your needs. Final price may vary depending on the duration and therapist recommendation.",
+    "highlights": [
+      "Faster Recovery",
+      "Pain Relief",
+      "Improved Mobility",
+      "Better Well-Being"
+    ],
+    "bookThis": "Book this session",
     "items": {
-      "dry-cupping": {
-        "name": "Dry Cupping (Hijama Jaffa)",
-        "short": "Non-invasive suction therapy that lifts tissue to stimulate circulation and release tension.",
-        "description": "Dry cupping is a non-invasive therapeutic technique in which suction is applied to the skin and maintained for approximately 5–15 minutes, lifting the superficial tissue to stimulate circulation and tissue mobility.",
+      "recovery-upper-body": {
+        "name": "Upper Body",
+        "short": "Neck, shoulders, upper back, arms and hands.",
+        "description": "A targeted recovery session for the upper body — neck, shoulders, upper back, arms and hands. Built to relieve pain, reduce muscle tension, and improve mobility where training load and daily posture accumulate most.",
         "howItWorks": [
-          "A vacuum is created inside the cup, lifting the skin and superficial muscle layers.",
-          "The lift stimulates local circulation and tissue mobility.",
-          "Cups are held in place for approximately 5–15 minutes.",
-          "Cups are removed and the treated area is assessed."
+          "A short assessment identifies tight and overloaded areas.",
+          "Targeted manual techniques treat the neck, shoulders, upper back, arms and hands.",
+          "Pressure and duration are tailored to your needs and your therapist's recommendation.",
+          "The session closes with mobility work and simple guidance for home."
         ],
         "benefits": [
-          "Muscle tension reduction",
-          "Myofascial release",
-          "Deep tissue relaxation",
-          "Chronic pain management",
-          "Improved circulation and recovery"
+          "Faster recovery",
+          "Pain relief",
+          "Improved mobility",
+          "Reduced muscle tension",
+          "Better well-being"
         ]
       },
-      "wet-cupping": {
-        "name": "Wet Cupping (Hijama)",
-        "short": "A two-step clearance treatment combining suction with controlled superficial micro-incisions.",
-        "description": "Wet cupping is a therapeutic two-step clearance treatment combining suction with controlled superficial micro-incisions to facilitate the removal of a small amount of blood. It is performed under strict sterile, single-use protocols.",
+      "recovery-lower-body": {
+        "name": "Lower Body",
+        "short": "Lower back, hips, glutes, legs and feet.",
+        "description": "A targeted recovery session for the lower body — lower back, hips, glutes, legs and feet. Ideal after heavy training or long days on your feet, it relieves pain, reduces muscle tension, and restores mobility.",
         "howItWorks": [
-          "An initial suction is applied to draw blood toward the treatment area.",
-          "The cup is removed and superficial epidermal scratches are made with sterile single-use tools.",
-          "The cup is reapplied to draw out stagnant capillary blood and interstitial fluid.",
-          "The area is cleaned and dressed."
+          "A short assessment identifies tight and overloaded areas.",
+          "Targeted manual techniques treat the lower back, hips, glutes, legs and feet.",
+          "Pressure and duration are tailored to your needs and your therapist's recommendation.",
+          "The session closes with mobility work and simple guidance for home."
         ],
         "benefits": [
-          "Chronic headache and migraine management",
-          "Supportive blood pressure management",
-          "Reduction of inflammatory conditions",
-          "Systemic detoxification support",
-          "Enhanced circulation"
+          "Faster recovery",
+          "Pain relief",
+          "Improved mobility",
+          "Reduced muscle tension",
+          "Better well-being"
         ]
       },
-      "flash-cupping": {
-        "name": "Flash Cupping (Fire / Empty Cupping)",
-        "short": "Rapid, repetitive cupping across an area to invigorate circulation and tissue mobility.",
-        "description": "Flash cupping involves the rapid and repetitive placement and removal of cups over targeted areas of the body, providing gentle therapeutic stimulation that warms the tissue and boosts circulation.",
+      "recovery-whole-body": {
+        "name": "Whole Body",
+        "short": "Full body recovery session for complete relief and balance.",
+        "description": "A complete full-body recovery session covering both the upper and lower body for total relief and balance — our most comprehensive option for restoring how you move and feel.",
         "howItWorks": [
-          "Suction is created — traditionally using heated air within a glass cup.",
-          "The cup is applied briefly, then removed.",
-          "The cup is repositioned repeatedly across the treatment area.",
-          "The technique is adjusted to your comfort and response."
+          "A full assessment maps tension and mobility across the whole body.",
+          "Upper and lower body are treated within one structured session.",
+          "Pressure and duration are tailored to your needs and your therapist's recommendation.",
+          "The session closes with mobility work and simple guidance for home."
         ],
         "benefits": [
-          "Improved local circulation",
-          "Respiratory congestion relief",
-          "Gentle therapeutic stimulation",
-          "Reduced treatment markings",
-          "Enhanced tissue mobility"
+          "Faster recovery",
+          "Pain relief",
+          "Improved mobility",
+          "Complete relief and balance",
+          "Better well-being"
         ]
       },
-      "recovery-massage": {
-        "name": "Recovery Massage",
-        "short": "Targeted manual therapy that accelerates recovery after training, load, or repetitive stress.",
-        "description": "Recovery massage is a targeted manual therapy designed to accelerate the body's recovery following intense physical activity, high training loads, or repetitive stress. Unlike traditional relaxation massage, it focuses specifically on restoring physical performance and promoting physiological healing.",
+      "cupping-upper-body": {
+        "name": "Upper Body",
+        "short": "Neck, shoulders, upper back, arms and hands.",
+        "description": "Traditional cupping therapy across the upper body — neck, shoulders, upper back, arms and hands — to improve circulation, support detoxification, and reduce pain.",
         "howItWorks": [
-          "A brief assessment identifies fatigued and overloaded muscle groups.",
-          "Targeted manual techniques address soft tissue, tone, and circulation.",
-          "Pressure and pace are tailored to your recovery goals.",
-          "The session supports lymphatic drainage and parasympathetic relaxation."
+          "Your therapist assesses the area and prepares the skin under strict hygiene.",
+          "Cups are applied across the neck, shoulders, upper back, arms and hands.",
+          "Suction is adjusted to your comfort and held for the appropriate time.",
+          "Cups are removed, and the area is cleaned and assessed."
         ],
         "benefits": [
-          "Enhanced blood circulation",
-          "Improved lymphatic drainage",
-          "Reduced muscle tension and tone",
-          "Faster recovery following exercise",
-          "Parasympathetic nervous system activation",
-          "Improved relaxation and systemic healing"
+          "Improved circulation",
+          "Detoxification support",
+          "Pain relief",
+          "Reduced muscle tension",
+          "Better well-being"
         ]
       },
-      "dry-needling": {
-        "name": "Dry Needling",
-        "short": "Evidence-based needling of trigger points to reduce pain and restore muscle function.",
-        "description": "Dry needling is an evidence-based technique performed by a qualified physical therapist using sterile, single-use filiform needles to target myofascial trigger points, dysfunctional muscle tissue, and connective tissue. It aims to reduce pain, restore normal muscle function, and improve movement by addressing underlying neuromuscular dysfunction.",
+      "cupping-lower-body": {
+        "name": "Lower Body",
+        "short": "Lower back, hips, glutes, legs and feet.",
+        "description": "Traditional cupping therapy across the lower body — lower back, hips, glutes, legs and feet — to improve circulation, support detoxification, and reduce pain.",
         "howItWorks": [
-          "A fine, sterile needle is inserted into a myofascial trigger point or affected muscle tissue.",
-          "The mechanical stimulation may elicit a localized twitch response.",
-          "This helps reduce muscle tension, improve local blood flow, and decrease pain sensitivity.",
-          "Unlike acupuncture, it is based on modern anatomy and neurophysiology."
+          "Your therapist assesses the area and prepares the skin under strict hygiene.",
+          "Cups are applied across the lower back, hips, glutes, legs and feet.",
+          "Suction is adjusted to your comfort and held for the appropriate time.",
+          "Cups are removed, and the area is cleaned and assessed."
         ],
         "benefits": [
-          "Reduction of myofascial pain and trigger points",
-          "Decreased muscle tension and spasms",
-          "Improved range of motion and flexibility",
-          "Enhanced neuromuscular function",
-          "Accelerated recovery following injury or exercise",
-          "Improved local circulation and tissue healing"
+          "Improved circulation",
+          "Detoxification support",
+          "Pain relief",
+          "Reduced muscle tension",
+          "Better well-being"
         ]
       },
-      "recovery-sessions": {
-        "name": "Recovery Sessions",
-        "short": "Complete recovery programmes for the upper, lower, or whole body.",
-        "description": "Recovery sessions combine recovery massage, mobilisation, and complementary techniques into a complete, structured programme tailored to a body region. Choose upper body, lower body, or a full whole-body reset — each designed to restore performance and promote physiological healing.",
+      "cupping-whole-body": {
+        "name": "Whole Body",
+        "short": "Full body cupping session for maximum benefits.",
+        "description": "A complete full-body cupping session covering both the upper and lower body for maximum benefits — circulation, detoxification, and pain relief from head to toe.",
         "howItWorks": [
-          "Choose your focus: upper body, lower body, or whole body.",
-          "Your therapist builds an evidence-based plan for the chosen region.",
-          "A combination of recovery techniques is applied and progressed.",
-          "You receive simple guidance to extend the benefits at home."
+          "Your therapist assesses the whole body and prepares the skin under strict hygiene.",
+          "Cups are applied systematically across the upper and lower body.",
+          "Suction is adjusted to your comfort and held for the appropriate time.",
+          "Cups are removed, and the treated areas are cleaned and assessed."
         ],
         "benefits": [
-          "Comprehensive, region-focused recovery",
-          "Combines multiple proven techniques",
-          "Scalable from targeted to full-body",
-          "Ideal for athletes and active lifestyles"
-        ]
-      },
-      "cupping-sessions": {
-        "name": "Cupping Sessions",
-        "short": "Structured cupping programmes for the upper, lower, or whole body.",
-        "description": "Cupping sessions deliver a structured cupping programme across your chosen body region. Blending dry, flash, and where appropriate wet cupping techniques, each session is designed to decompress tissue, boost circulation, and support recovery across the area.",
-        "howItWorks": [
-          "Choose your focus: upper body, lower body, or whole body.",
-          "Your therapist selects the appropriate cupping techniques.",
-          "Cups are applied systematically across the region.",
-          "The session is adjusted to your comfort and response."
-        ],
-        "benefits": [
-          "Region-wide tissue decompression",
-          "Boosts circulation across the area",
-          "Blends multiple cupping techniques",
-          "Scalable from targeted to full-body"
+          "Improved circulation",
+          "Detoxification support",
+          "Pain relief",
+          "Maximum full-body benefit",
+          "Better well-being"
         ]
       }
     }
   },
   "about": {
-    "eyebrow": "About Mend Lab",
+    "eyebrow": "About MendLab",
     "title": "Where sports science meets traditional therapy",
-    "intro": "Mend Lab is a premier science-driven wellness and physical recovery lab based in Cairo, Egypt. Founded to bridge the gap between advanced sports science and traditional therapeutic practices, we deliver evidence-based recovery solutions designed to optimize physical restoration, performance, and overall well-being.",
+    "intro": "MendLab is a premier science-driven wellness and physical recovery lab based in Cairo, Egypt. Founded to bridge the gap between advanced sports science and traditional therapeutic practices, we deliver evidence-based recovery solutions designed to optimize physical restoration, performance, and overall well-being.",
     "story": {
       "title": "Our Story",
-      "body": "Mend Lab specializes in advanced recovery protocols, physical rehabilitation, therapeutic massage, and specialized cupping therapy (Hijama) — serving athletes, fitness enthusiasts, and individuals seeking high-quality recovery and wellness services. Every treatment is delivered within a premium, highly hygienic, and professionally managed clinical environment that prioritizes safety, effectiveness, and client comfort."
+      "body": "MendLab specializes in advanced recovery protocols, physical rehabilitation, therapeutic massage, and specialized cupping therapy (Hijama) — serving athletes, fitness enthusiasts, and individuals seeking high-quality recovery and wellness services. Every treatment is delivered within a premium, highly hygienic, and professionally managed clinical environment that prioritizes safety, effectiveness, and client comfort."
     },
     "mission": {
       "title": "Our Mission",
@@ -255,17 +255,29 @@
     "values": {
       "title": "What We Stand For",
       "items": [
-        { "title": "Evidence First", "body": "We follow the science, not trends." },
-        { "title": "Hygiene & Safety", "body": "Sterile, single-use protocols, always." },
-        { "title": "Personal Care", "body": "Programs built around you, not a template." },
-        { "title": "Genuine Results", "body": "We measure success by how you feel and move." }
+        {
+          "title": "Evidence First",
+          "body": "We follow the science, not trends."
+        },
+        {
+          "title": "Hygiene & Safety",
+          "body": "Sterile, single-use protocols, always."
+        },
+        {
+          "title": "Personal Care",
+          "body": "Programs built around you, not a template."
+        },
+        {
+          "title": "Genuine Results",
+          "body": "We measure success by how you feel and move."
+        }
       ]
     },
     "leadership": {
       "title": "Leadership",
       "name": "Ahmed Hosny",
       "role": "CEO & Founder",
-      "bio": "Ahmed Hosny is the CEO and Founder of Mend Lab. With an academic background in Physical Therapy and a strong foundation in sports science and physical rehabilitation, he established Mend Lab with a vision of modernizing traditional therapeutic practices through evidence-based methodologies. His work integrates contemporary sports recovery science with traditional wellness approaches — including Traditional Chinese Medicine (TCM) and advanced cupping therapy — drawing on extensive knowledge of muscle plasticity, recovery science, performance optimization, and plyometric training mechanisms. Passionate about sports performance and sports marketing, he develops targeted recovery strategies and educational content that help competitive athletes, fitness enthusiasts, and everyday clients achieve optimal physical restoration and performance."
+      "bio": "Ahmed Hosny is the CEO and Founder of MendLab. With an academic background in Physical Therapy and a strong foundation in sports science and physical rehabilitation, he established MendLab with a vision of modernizing traditional therapeutic practices through evidence-based methodologies. His work integrates contemporary sports recovery science with traditional wellness approaches — including Traditional Chinese Medicine (TCM) and advanced cupping therapy — drawing on extensive knowledge of muscle plasticity, recovery science, performance optimization, and plyometric training mechanisms. Passionate about sports performance and sports marketing, he develops targeted recovery strategies and educational content that help competitive athletes, fitness enthusiasts, and everyday clients achieve optimal physical restoration and performance."
     }
   },
   "booking": {
@@ -321,14 +333,12 @@
       "addressLabel": "Location",
       "address": "Cairo, Egypt",
       "phoneLabel": "Phone",
-      "phone": "010 1234 5678",
       "emailLabel": "Email",
-      "email": "hello@mendlab.eg",
       "hoursLabel": "Hours",
       "hours": "Saturday – Thursday, 10:00 – 22:00",
       "socialLabel": "Follow us"
     },
-    "mapPlaceholder": "Map location — embed coming soon",
+    "mapPlaceholder": "View on Google Maps",
     "form": {
       "title": "Send us a message",
       "name": "Full name",
@@ -351,6 +361,6 @@
     "servicesTitle": "Services",
     "contactTitle": "Contact",
     "rights": "All rights reserved.",
-    "disclaimer": "Mend Lab provides wellness and recovery services and is not a substitute for medical advice."
+    "disclaimer": "MendLab provides wellness and recovery services and is not a substitute for medical advice."
   }
 }

@@ -1,23 +1,16 @@
 import {
-  Activity,
-  Circle,
-  Droplet,
+  Footprints,
   Hand,
-  Layers,
-  Syringe,
-  Zap,
+  PersonStanding,
+  Circle,
   type LucideIcon,
 } from "lucide-react";
 
 /** Maps a service `icon` key (see lib/services) to a Lucide icon. */
 const iconMap: Record<string, LucideIcon> = {
-  circle: Circle,
-  droplet: Droplet,
-  zap: Zap,
-  hand: Hand,
-  needle: Syringe,
-  activity: Activity,
-  layers: Layers,
+  upper: Hand,
+  lower: Footprints,
+  whole: PersonStanding,
 };
 
 export function ServiceIcon({
