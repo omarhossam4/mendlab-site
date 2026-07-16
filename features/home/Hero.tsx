@@ -69,20 +69,6 @@ export function Hero({ locale, dict }: LocalizedProps) {
                 {t.secondaryCta}
               </Button>
             </div>
-
-            {/* Stats row */}
-            <dl className="mt-12 flex flex-wrap gap-x-10 gap-y-6 border-t border-white/15 pt-8">
-              {t.stats.map((stat) => (
-                <div key={stat.label}>
-                  <dt className="text-3xl font-bold sm:text-4xl">
-                    {stat.value}
-                  </dt>
-                  <dd className="mt-1 text-xs font-semibold uppercase tracking-widest text-white/70">
-                    {stat.label}
-                  </dd>
-                </div>
-              ))}
-            </dl>
           </Reveal>
         </div>
       </Container>
