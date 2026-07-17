@@ -77,149 +77,147 @@
     "servicesPreview": {
       "eyebrow": "What We Offer",
       "title": "Our Services",
-      "subtitle": "Targeted recovery and traditional cupping sessions — for the upper body, lower body, or whole body.",
+      "subtitle": "Massage and cupping services designed around how you move, train and feel.",
       "cta": "View all services"
     },
     "cta": {
       "title": "Ready to feel the difference?",
       "subtitle": "Book your first session at MendLab and start recovering the smart way.",
       "button": "Book Your Session"
+    },
+    "reviews": {
+      "eyebrow": "Reviews",
+      "title": "What Our Clients Say",
+      "subtitle": "Real feedback from people who recover with us.",
+      "items": [
+        {
+          "name": "[Customer name]",
+          "rating": 5,
+          "text": "[Paste a real customer review here]"
+        },
+        {
+          "name": "[Customer name]",
+          "rating": 5,
+          "text": "[Paste a real customer review here]"
+        },
+        {
+          "name": "[Customer name]",
+          "rating": 5,
+          "text": "[Paste a real customer review here]"
+        }
+      ]
     }
   },
   "services": {
     "eyebrow": "Our Services",
-    "title": "Recovery & Cupping Sessions",
-    "subtitle": "Targeted sessions priced by body area — choose the upper body, lower body, or a full whole-body reset.",
-    "categories": {
-      "recovery": {
-        "name": "Recovery Sessions",
-        "description": "Targeted recovery sessions to relieve pain, reduce muscle tension, and improve mobility."
-      },
-      "cupping": {
-        "name": "Cupping Sessions",
-        "description": "Traditional cupping therapy to improve circulation, detoxify the body and reduce pain."
-      }
-    },
+    "title": "Massage & Cupping Services",
+    "subtitle": "Heal Better. Move Better. Live Better.",
+    "tagline": "Heal Better. Move Better. Live Better.",
     "howItWorksLabel": "How It Works",
     "benefitsLabel": "Benefits",
     "pricingLabel": "Price",
-    "priceNote": "Prices may vary depending on the duration and specific treatment plan.",
-    "noteLabel": "Please note",
-    "note": "Our sessions are customized to your needs. Final price may vary depending on the duration and therapist recommendation.",
-    "highlights": [
-      "Faster Recovery",
-      "Pain Relief",
-      "Improved Mobility",
-      "Better Well-Being"
-    ],
-    "bookThis": "Book this session",
+    "bookThis": "Book this service",
     "items": {
-      "recovery-upper-body": {
-        "name": "Upper Body",
-        "short": "Neck, shoulders, upper back, arms and hands.",
-        "description": "A targeted recovery session for the upper body — neck, shoulders, upper back, arms and hands. Built to relieve pain, reduce muscle tension, and improve mobility where training load and daily posture accumulate most.",
+      "wet-dry-cupping": {
+        "name": "Wet/Dry Cupping Therapy",
+        "short": "Helps detoxify the body, improve circulation and relieve pain.",
+        "description": "Traditional cupping therapy — wet or dry, chosen to suit you — using controlled suction to decompress tissue. It helps detoxify the body, improve circulation and relieve pain.",
         "howItWorks": [
-          "A short assessment identifies tight and overloaded areas.",
-          "Targeted manual techniques treat the neck, shoulders, upper back, arms and hands.",
-          "Pressure and duration are tailored to your needs and your therapist's recommendation.",
-          "The session closes with mobility work and simple guidance for home."
+          "Your therapist assesses the area and prepares the skin under strict hygiene.",
+          "Cups are applied and the suction is adjusted to your comfort.",
+          "For wet cupping, sterile single-use tools are used throughout.",
+          "Cups are removed and the area is cleaned and assessed."
         ],
         "benefits": [
-          "Faster recovery",
+          "Detoxification support",
+          "Improved circulation",
           "Pain relief",
+          "Reduced muscle tension"
+        ]
+      },
+      "back-massage-cupping": {
+        "name": "Back Massage + Cupping",
+        "short": "Relieves tension, improves circulation and reduces pain.",
+        "description": "A focused back massage combined with cupping. The pairing releases built-up tension through the back, improves circulation and reduces pain.",
+        "howItWorks": [
+          "A short assessment identifies the tightest areas across your back.",
+          "Massage techniques work through the back muscles.",
+          "Cups are applied to decompress tissue and boost circulation.",
+          "The session finishes with lighter work to settle the area."
+        ],
+        "benefits": [
+          "Relieves back tension",
+          "Improved circulation",
+          "Pain relief",
+          "Deep relaxation"
+        ]
+      },
+      "upper-massage": {
+        "name": "Upper Massage",
+        "short": "Targets the neck, shoulders, upper back and arms.",
+        "description": "A targeted massage for the upper body — neck, shoulders, upper back and arms. Ideal where training load and daily posture build up the most tension.",
+        "howItWorks": [
+          "A short assessment identifies tight and overloaded areas.",
+          "Targeted techniques treat the neck, shoulders, upper back and arms.",
+          "Pressure is tailored to your comfort and your therapist's recommendation.",
+          "The session closes with mobility work for the area."
+        ],
+        "benefits": [
+          "Releases neck and shoulder tension",
           "Improved mobility",
-          "Reduced muscle tension",
+          "Pain relief",
           "Better well-being"
         ]
       },
-      "recovery-lower-body": {
-        "name": "Lower Body",
-        "short": "Lower back, hips, glutes, legs and feet.",
-        "description": "A targeted recovery session for the lower body — lower back, hips, glutes, legs and feet. Ideal after heavy training or long days on your feet, it relieves pain, reduces muscle tension, and restores mobility.",
+      "upper-package": {
+        "name": "Upper Package",
+        "short": "Upper massage + cupping for complete upper body relief.",
+        "description": "Our upper massage combined with cupping for complete upper body relief — the most thorough option for the neck, shoulders, upper back and arms.",
         "howItWorks": [
           "A short assessment identifies tight and overloaded areas.",
-          "Targeted manual techniques treat the lower back, hips, glutes, legs and feet.",
-          "Pressure and duration are tailored to your needs and your therapist's recommendation.",
-          "The session closes with mobility work and simple guidance for home."
+          "Targeted massage works through the neck, shoulders, upper back and arms.",
+          "Cupping is added to decompress tissue and boost circulation.",
+          "The session closes with mobility work for the area."
         ],
         "benefits": [
-          "Faster recovery",
-          "Pain relief",
-          "Improved mobility",
-          "Reduced muscle tension",
-          "Better well-being"
+          "Complete upper body relief",
+          "Massage and cupping combined",
+          "Improved circulation",
+          "Improved mobility"
         ]
       },
-      "recovery-whole-body": {
-        "name": "Whole Body",
-        "short": "Full body recovery session for complete relief and balance.",
-        "description": "A complete full-body recovery session covering both the upper and lower body for total relief and balance — our most comprehensive option for restoring how you move and feel.",
+      "full-body-massage": {
+        "name": "Full Body Massage",
+        "short": "Full body massage session to relax muscles and restore balance.",
+        "description": "A full body massage session covering upper and lower body, designed to relax the muscles and restore balance from head to toe.",
         "howItWorks": [
-          "A full assessment maps tension and mobility across the whole body.",
+          "A full assessment maps tension across the whole body.",
           "Upper and lower body are treated within one structured session.",
-          "Pressure and duration are tailored to your needs and your therapist's recommendation.",
-          "The session closes with mobility work and simple guidance for home."
+          "Pressure and pace are tailored to your comfort.",
+          "The session closes with lighter strokes to aid relaxation."
         ],
         "benefits": [
-          "Faster recovery",
-          "Pain relief",
-          "Improved mobility",
-          "Complete relief and balance",
+          "Relaxes the whole body",
+          "Restores balance",
+          "Relieves accumulated tension",
           "Better well-being"
         ]
       },
-      "cupping-upper-body": {
-        "name": "Upper Body",
-        "short": "Neck, shoulders, upper back, arms and hands.",
-        "description": "Traditional cupping therapy across the upper body — neck, shoulders, upper back, arms and hands — to improve circulation, support detoxification, and reduce pain.",
+      "full-body-package": {
+        "name": "Full Body Package",
+        "short": "Full body massage + cupping for maximum recovery.",
+        "description": "Our full body massage combined with cupping for maximum recovery — the most complete session we offer, covering the whole body.",
         "howItWorks": [
-          "Your therapist assesses the area and prepares the skin under strict hygiene.",
-          "Cups are applied across the neck, shoulders, upper back, arms and hands.",
-          "Suction is adjusted to your comfort and held for the appropriate time.",
-          "Cups are removed, and the area is cleaned and assessed."
+          "A full assessment maps tension across the whole body.",
+          "Full body massage works through the upper and lower body.",
+          "Cupping is applied across the areas that need it most.",
+          "The session closes with mobility work and guidance for home."
         ],
         "benefits": [
+          "Maximum full-body recovery",
+          "Massage and cupping combined",
           "Improved circulation",
-          "Detoxification support",
-          "Pain relief",
-          "Reduced muscle tension",
-          "Better well-being"
-        ]
-      },
-      "cupping-lower-body": {
-        "name": "Lower Body",
-        "short": "Lower back, hips, glutes, legs and feet.",
-        "description": "Traditional cupping therapy across the lower body — lower back, hips, glutes, legs and feet — to improve circulation, support detoxification, and reduce pain.",
-        "howItWorks": [
-          "Your therapist assesses the area and prepares the skin under strict hygiene.",
-          "Cups are applied across the lower back, hips, glutes, legs and feet.",
-          "Suction is adjusted to your comfort and held for the appropriate time.",
-          "Cups are removed, and the area is cleaned and assessed."
-        ],
-        "benefits": [
-          "Improved circulation",
-          "Detoxification support",
-          "Pain relief",
-          "Reduced muscle tension",
-          "Better well-being"
-        ]
-      },
-      "cupping-whole-body": {
-        "name": "Whole Body",
-        "short": "Full body cupping session for maximum benefits.",
-        "description": "A complete full-body cupping session covering both the upper and lower body for maximum benefits — circulation, detoxification, and pain relief from head to toe.",
-        "howItWorks": [
-          "Your therapist assesses the whole body and prepares the skin under strict hygiene.",
-          "Cups are applied systematically across the upper and lower body.",
-          "Suction is adjusted to your comfort and held for the appropriate time.",
-          "Cups are removed, and the treated areas are cleaned and assessed."
-        ],
-        "benefits": [
-          "Improved circulation",
-          "Detoxification support",
-          "Pain relief",
-          "Maximum full-body benefit",
-          "Better well-being"
+          "Restores balance"
         ]
       }
     }

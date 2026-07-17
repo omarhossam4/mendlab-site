@@ -41,7 +41,6 @@ export default async function AboutPage({
             <ImagePlaceholder
               src="/images/about-clinic.jpg"
               alt={t.story.title}
-              icon="layers"
               className="aspect-[4/3] rounded-3xl"
             />
           </Reveal>

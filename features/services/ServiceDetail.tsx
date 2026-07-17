@@ -5,7 +5,6 @@ import { getServiceCopy, type Service } from "@/lib/services";
 import { cn, formatPrice, localeHref } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
-import { ServiceIcon } from "@/components/ui/ServiceIcon";
 import { Reveal } from "@/components/ui/Reveal";
 
 /** Full service section: overview, how-it-works, benefits, and price. */
@@ -40,21 +39,15 @@ export function ServiceDetail({
           <ImagePlaceholder
             src={service.image}
             alt={item.name}
-            icon={service.icon}
             className="aspect-[4/3] rounded-3xl"
           />
 
           {/* Copy */}
           <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary">
-                  <ServiceIcon name={service.icon} className="h-5 w-5" />
-                </span>
-                <h3 className="text-2xl font-bold text-text-dark sm:text-3xl">
-                  {item.name}
-                </h3>
-              </div>
+              <h3 className="text-2xl font-bold text-text-dark sm:text-3xl">
+                {item.name}
+              </h3>
               <span className="rounded-full bg-primary-dark px-4 py-1.5 text-lg font-bold text-white">
                 {formatPrice(service.priceEGP, locale)}{" "}
                 <span className="text-xs font-medium text-white/70">
@@ -101,9 +94,7 @@ export function ServiceDetail({
               </div>
             </div>
 
-            <p className="mt-6 text-xs text-text-dark/55">{t.priceNote}</p>
-
-            <div className="mt-5">
+            <div className="mt-7">
               <Button href={localeHref(locale, "/booking")} variant="primary">
                 {t.bookThis}
               </Button>

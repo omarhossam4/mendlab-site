@@ -8,7 +8,12 @@ export type SubmissionType = "booking" | "contact";
 
 export interface SubmissionResult {
   ok: boolean;
-  reason?: "not-configured" | "network" | "upstream" | "bad-request";
+  reason?:
+    | "not-configured"
+    | "network"
+    | "upstream"
+    | "bad-request"
+    | "slot-taken";
 }
 
 export async function submitToSheet(

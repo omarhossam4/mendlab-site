@@ -4,12 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Loader2 } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-import {
-  services,
-  serviceCategories,
-  getServiceCopy,
-  getServiceFullName,
-} from "@/lib/services";
+import { services, getServiceCopy } from "@/lib/services";
 import { cn, formatPrice } from "@/lib/utils";
 import {
   formatDayLong,
@@ -21,7 +16,6 @@ import {
 } from "@/lib/slots";
 import { submitToSheet } from "@/lib/submit";
 import { Button } from "@/components/ui/Button";
-import { ServiceIcon } from "@/components/ui/ServiceIcon";
 import {
   FieldError,
   Label,
@@ -128,7 +122,7 @@ export function BookingForm({
     [form.serviceId],
   );
   const selectionLabel = selectedService
-    ? getServiceFullName(dict, selectedService)
+    ? getServiceCopy(dict, selectedService.id).name
     : "";
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -167,14 +161,16 @@ export function BookingForm({
     setStatus("submitting");
     setSubmitError("");
 
+    // Field names match the Apps Script's doPost contract exactly
+    // (date, slotId, customerName, phone, service). Extra fields are ignored
+    // by the script until columns exist for them.
     const result = await submitToSheet("booking", {
-      service: selectionLabel,
-      serviceValue: form.serviceId,
-      price: selectedService ? `${selectedService.priceEGP} EGP` : "",
       date: form.date,
-      time: form.time,
-      name: form.name,
+      slotId: form.time,
+      customerName: form.name,
       phone: form.phone,
+      service: selectionLabel,
+      price: selectedService ? `${selectedService.priceEGP} EGP` : "",
       email: form.email,
       notes: form.notes,
       locale,
@@ -182,14 +178,28 @@ export function BookingForm({
 
     if (result.ok) {
       setStatus("success");
-    } else {
-      setStatus("error");
-      setSubmitError(
-        result.reason === "not-configured"
-          ? t.errors.notConfigured
-          : t.errors.submit,
-      );
+      return;
     }
+
+    setStatus("error");
+    if (result.reason === "slot-taken") {
+      // Someone won the race. Send them back to pick another time and
+      // re-check availability for that day.
+      setAvailability((a) => {
+        const next = { ...a };
+        delete next[form.date];
+        return next;
+      });
+      setForm((f) => ({ ...f, time: "" }));
+      setErrors({ time: t.errors.slotTaken });
+      setStep(1);
+      return;
+    }
+    setSubmitError(
+      result.reason === "not-configured"
+        ? t.errors.notConfigured
+        : t.errors.submit,
+    );
   }
 
   function reset() {
@@ -281,76 +291,54 @@ export function BookingForm({
 
       <div className="rounded-3xl border border-primary-100 bg-surface p-5 shadow-[var(--shadow-card)] sm:p-8">
         <form onSubmit={handleSubmit} noValidate>
-          {/* Step 1: Service — the six price-list sessions, grouped by category */}
+          {/* Step 1: Service — the six services from the price list */}
           {step === 0 ? (
             <div>
               <h2 className="mb-5 text-lg font-semibold text-text-dark sm:text-xl">
                 {t.selectServicePrompt}
               </h2>
 
-              <div className="space-y-6">
-                {serviceCategories.map((category) => (
-                  <fieldset key={category}>
-                    <legend className="mb-3 text-sm font-bold uppercase tracking-wider text-accent">
-                      {dict.services.categories[category].name}
-                    </legend>
-                    <div className="grid gap-2.5 sm:grid-cols-3">
-                      {services
-                        .filter((s) => s.category === category)
-                        .map((service) => {
-                          const copy = getServiceCopy(dict, service.id);
-                          const active = form.serviceId === service.id;
-                          return (
-                            <button
-                              key={service.id}
-                              type="button"
-                              onClick={() => update("serviceId", service.id)}
-                              aria-pressed={active}
-                              className={cn(
-                                "rounded-2xl border p-4 text-start transition-all",
-                                active
-                                  ? "border-accent bg-primary-50/60 ring-1 ring-accent"
-                                  : "border-primary-100 hover:border-primary-200 hover:bg-primary-50/30",
-                              )}
-                            >
-                              <span className="flex items-center justify-between gap-2">
-                                <span
-                                  className={cn(
-                                    "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
-                                    active
-                                      ? "bg-primary text-white"
-                                      : "bg-primary-50 text-primary",
-                                  )}
-                                >
-                                  <ServiceIcon
-                                    name={service.icon}
-                                    className="h-4 w-4"
-                                  />
-                                </span>
-                                {active ? (
-                                  <Check className="h-4 w-4 text-accent" />
-                                ) : null}
-                              </span>
-                              <span className="mt-3 block font-semibold text-text-dark">
-                                {copy.name}
-                              </span>
-                              <span className="mt-1 block text-lg font-bold text-primary">
-                                {formatPrice(service.priceEGP, locale)}{" "}
-                                <span className="text-xs font-medium text-text-dark/60">
-                                  {dict.common.egp}
-                                </span>
-                              </span>
-                            </button>
-                          );
-                        })}
-                    </div>
-                  </fieldset>
-                ))}
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {services.map((service) => {
+                  const copy = getServiceCopy(dict, service.id);
+                  const active = form.serviceId === service.id;
+                  return (
+                    <button
+                      key={service.id}
+                      type="button"
+                      onClick={() => update("serviceId", service.id)}
+                      aria-pressed={active}
+                      className={cn(
+                        "rounded-2xl border p-4 text-start transition-all",
+                        active
+                          ? "border-accent bg-primary-50/60 ring-1 ring-accent"
+                          : "border-primary-100 hover:border-primary-200 hover:bg-primary-50/30",
+                      )}
+                    >
+                      <span className="flex items-start justify-between gap-3">
+                        <span className="font-semibold text-text-dark">
+                          {copy.name}
+                        </span>
+                        <span className="flex shrink-0 items-center gap-2">
+                          <span className="text-lg font-bold text-primary">
+                            {formatPrice(service.priceEGP, locale)}{" "}
+                            <span className="text-xs font-medium text-text-dark/60">
+                              {dict.common.egp}
+                            </span>
+                          </span>
+                          {active ? (
+                            <Check className="h-4 w-4 text-accent" />
+                          ) : null}
+                        </span>
+                      </span>
+                      <span className="mt-1.5 block text-xs leading-relaxed text-text-dark/60">
+                        {copy.short}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
               <FieldError message={errors.serviceId} />
-              <p className="mt-4 text-xs text-text-dark/55">
-                {dict.services.priceNote}
-              </p>
             </div>
           ) : null}
 

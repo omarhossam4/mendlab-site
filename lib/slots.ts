@@ -4,10 +4,10 @@
  * MendLab runs twelve one-hour slots from 12:00 PM to 12:00 AM, bookable for
  * today plus the next seven days.
  *
- * Slot values are always 24h "HH:MM" strings of the slot's START time
- * (e.g. "12:00", "23:00"). That exact format is what gets written to the
- * Google Sheet and what the availability endpoint compares against, so don't
- * change it without updating Code.gs too.
+ * A slot id is `"<startHour>-<endHour>"` in 24h form — "12-13" … "23-24".
+ * This is the Apps Script's `slotId` format (see Code.gs `generateTimeSlots`),
+ * and it's what lands in the sheet's TimeSlot column, so don't change it on one
+ * side without the other.
  */
 
 /** Slot start hours: 12, 13 … 23. */
@@ -25,9 +25,14 @@ function toISODate(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-/** All twelve slot values, e.g. ["12:00", … "23:00"]. */
+/** All twelve slot ids, e.g. ["12-13", … "23-24"]. */
 export function getSlots(): string[] {
-  return SLOT_START_HOURS.map((h) => `${pad(h)}:00`);
+  return SLOT_START_HOURS.map((h) => `${h}-${h + 1}`);
+}
+
+/** "12-13" -> 12 */
+function slotStartHour(slotId: string): number {
+  return Number(slotId.split("-")[0]);
 }
 
 /**
@@ -46,9 +51,9 @@ function intlLocale(locale: string) {
   return locale === "ar" ? "ar-EG" : "en-US";
 }
 
-/** "12:00" -> "12:00 PM – 1:00 PM" (localized). */
-export function formatSlotLabel(value: string, locale: string): string {
-  const startHour = Number(value.split(":")[0]);
+/** "12-13" -> "12:00 PM – 1:00 PM" (localized). */
+export function formatSlotLabel(slotId: string, locale: string): string {
+  const startHour = slotStartHour(slotId);
   const fmt = (hour: number) =>
     new Intl.DateTimeFormat(intlLocale(locale), {
       hour: "numeric",
@@ -82,8 +87,8 @@ export function formatDayLong(iso: string, locale: string): string {
 }
 
 /** True if the slot has already started (only ever true for today). */
-export function isSlotInPast(iso: string, value: string): boolean {
+export function isSlotInPast(iso: string, slotId: string): boolean {
   const now = new Date();
   if (iso !== toISODate(now)) return false;
-  return Number(value.split(":")[0]) <= now.getHours();
+  return slotStartHour(slotId) <= now.getHours();
 }

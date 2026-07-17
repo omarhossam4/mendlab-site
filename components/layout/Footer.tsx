@@ -4,7 +4,7 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getNavLinks, socialLinks, contactDetails } from "@/lib/navigation";
 import { localeHref } from "@/lib/utils";
-import { services, getServiceFullName } from "@/lib/services";
+import { services, getServiceCopy } from "@/lib/services";
 import { Container } from "@/components/ui/Container";
 import { Logo } from "./Logo";
 import { InstagramIcon, TikTokIcon } from "@/components/ui/SocialIcons";
@@ -76,7 +76,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                     href={localeHref(locale, `/services#${service.slug}`)}
                     className="text-white/70 transition-colors hover:text-white"
                   >
-                    {getServiceFullName(dict, service)}
+                    {getServiceCopy(dict, service.id).name}
                   </Link>
                 </li>
               ))}

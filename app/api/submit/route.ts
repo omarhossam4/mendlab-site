@@ -52,17 +52,32 @@ export async function POST(request: Request) {
       );
     }
 
-    // Apps Script returns JSON ({ ok: true }); tolerate non-JSON just in case.
+    // Apps Script answers { success: true } / { success: false, error: "..." }.
+    // `ok` is also accepted so an older script keeps working. Non-JSON still
+    // counts as delivered.
     const text = await res.text();
     let upstreamOk = true;
+    let error: string | null = null;
     try {
       const data = JSON.parse(text);
-      if (data && typeof data.ok === "boolean") upstreamOk = data.ok;
+      if (data && typeof data.success === "boolean") upstreamOk = data.success;
+      else if (data && typeof data.ok === "boolean") upstreamOk = data.ok;
+      if (typeof data?.error === "string") error = data.error;
     } catch {
       /* non-JSON response still counts as delivered */
     }
 
-    return NextResponse.json({ ok: upstreamOk });
+    if (upstreamOk) return NextResponse.json({ ok: true });
+
+    // The script re-checks the slot under a lock and rejects it if someone won
+    // the race — surface that distinctly so the form can say something useful.
+    const slotTaken = /just booked|booked by someone else|already booked/i.test(
+      error ?? "",
+    );
+    return NextResponse.json(
+      { ok: false, reason: slotTaken ? "slot-taken" : "upstream" },
+      { status: 502 },
+    );
   } catch {
     return NextResponse.json(
       { ok: false, reason: "network" },

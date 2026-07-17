@@ -14,7 +14,7 @@ export function Hero({ locale, dict }: LocalizedProps) {
     <section className="relative overflow-hidden bg-primary-dark text-white">
       {/* Full-bleed background photo */}
       <Image
-        src="/images/hero-new.png"
+        src="/images/hero-2.png"
         alt=""
         fill
         priority

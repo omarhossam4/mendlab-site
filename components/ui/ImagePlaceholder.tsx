@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { ServiceIcon } from "./ServiceIcon";
 
 /**
  * Branded image slot with automatic fallback.
@@ -16,7 +15,6 @@ import { ServiceIcon } from "./ServiceIcon";
 export function ImagePlaceholder({
   src,
   alt,
-  icon,
   label,
   className,
   priority = false,
@@ -24,7 +22,6 @@ export function ImagePlaceholder({
 }: {
   src?: string;
   alt: string;
-  icon?: string;
   label?: string;
   className?: string;
   priority?: boolean;
@@ -44,18 +41,11 @@ export function ImagePlaceholder({
     >
       {/* Gradient fallback / loading background */}
       <div className="hex-pattern absolute inset-0 opacity-40" />
-      <div className="relative flex flex-col items-center gap-3 text-white/90">
-        {icon ? (
-          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
-            <ServiceIcon name={icon} className="h-8 w-8" />
-          </span>
-        ) : null}
-        {label ? (
-          <span className="px-4 text-center text-sm font-medium tracking-wide text-white/70">
-            {label}
-          </span>
-        ) : null}
-      </div>
+      {label ? (
+        <span className="relative px-4 text-center text-sm font-medium tracking-wide text-white/70">
+          {label}
+        </span>
+      ) : null}
 
       {/* Real photo — covers the gradient once loaded; hidden on error */}
       {showImage ? (
