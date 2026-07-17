@@ -53,21 +53,36 @@ export async function POST(request: Request) {
     }
 
     // Apps Script answers { success: true } / { success: false, error: "..." }.
-    // `ok` is also accepted so an older script keeps working. Non-JSON still
-    // counts as delivered.
+    // `ok` is also accepted so an older script keeps working.
+    //
+    // A non-JSON body means the script did NOT run — almost always an HTML
+    // sign-in or error page, which happens when the Web App isn't deployed with
+    // access "Anyone", or the deployment is serving a stale/broken version.
+    // This must be a failure: reporting success here would tell a customer they
+    // were booked when nothing was written to the sheet.
     const text = await res.text();
-    let upstreamOk = true;
-    let error: string | null = null;
+    let data: unknown;
     try {
-      const data = JSON.parse(text);
-      if (data && typeof data.success === "boolean") upstreamOk = data.success;
-      else if (data && typeof data.ok === "boolean") upstreamOk = data.ok;
-      if (typeof data?.error === "string") error = data.error;
+      data = JSON.parse(text);
     } catch {
-      /* non-JSON response still counts as delivered */
+      console.error(
+        "[api/submit] Apps Script returned non-JSON (the script did not run). " +
+          "Check the Web App is deployed with access 'Anyone'. First 300 chars:",
+        text.slice(0, 300),
+      );
+      return NextResponse.json(
+        { ok: false, reason: "upstream" },
+        { status: 502 },
+      );
     }
 
+    const reply = data as { success?: unknown; ok?: unknown; error?: unknown };
+    const upstreamOk = reply?.success === true || reply?.ok === true;
+    const error = typeof reply?.error === "string" ? reply.error : null;
+
     if (upstreamOk) return NextResponse.json({ ok: true });
+
+    console.error("[api/submit] Apps Script rejected the submission:", error);
 
     // The script re-checks the slot under a lock and rejects it if someone won
     // the race — surface that distinctly so the form can say something useful.
