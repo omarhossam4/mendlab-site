@@ -300,14 +300,23 @@
       "phone": "Please enter a valid phone number.",
       "email": "Please enter a valid email address.",
       "submit": "Something went wrong. Please try again or contact us directly.",
-      "notConfigured": "Booking is not connected yet. Please set NEXT_PUBLIC_BOOKING_SCRIPT_URL."
+      "notConfigured": "Booking is not connected yet. Please set NEXT_PUBLIC_BOOKING_SCRIPT_URL.",
+      "slotTaken": "That time has just been booked. Please choose another."
     },
     "success": {
       "title": "Booking received!",
       "body": "Thank you — we've received your request and will contact you soon to confirm your appointment.",
       "again": "Make another booking"
     },
-    "summary": "Summary"
+    "summary": "Summary",
+    "slots": {
+      "available": "Available",
+      "booked": "Booked",
+      "loading": "Checking availability…",
+      "pickDayFirst": "Choose a day above to see available times.",
+      "bookedTitle": "Already booked",
+      "pastTitle": "This time has passed"
+    }
   },
   "contact": {
     "eyebrow": "Contact Us",
@@ -319,7 +328,7 @@
       "phoneLabel": "Phone",
       "emailLabel": "Email",
       "hoursLabel": "Hours",
-      "hours": "Saturday – Thursday, 10:00 – 22:00",
+      "hours": "Every day, 12:00 – 00:00",
       "socialLabel": "Follow us"
     },
     "mapPlaceholder": "View on Google Maps",

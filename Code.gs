@@ -47,9 +47,64 @@ function doPost(e) {
   }
 }
 
-// Simple GET handler so you can confirm the deployment is live in a browser.
-function doGet() {
-  return json_({ ok: true, service: "Mend Lab submissions endpoint" });
+/**
+ * GET handler.
+ *
+ *   ?date=YYYY-MM-DD  -> { ok: true, booked: ["12:00", "15:00"] }
+ *   (no params)       -> health check, so you can confirm the deployment is live
+ *
+ * PRIVACY: this endpoint is public. It returns ONLY the booked slot times for a
+ * day — never names, phones, emails or notes. Do not add customer fields here.
+ */
+function doGet(e) {
+  try {
+    var date = e && e.parameter ? e.parameter.date : null;
+    if (!date) {
+      return json_({ ok: true, service: "MendLab submissions endpoint" });
+    }
+
+    var ss = SHEET_ID
+      ? SpreadsheetApp.openById(SHEET_ID)
+      : SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(BOOKINGS_TAB);
+    if (!sheet) return json_({ ok: true, booked: [] });
+
+    var values = sheet.getDataRange().getValues();
+    if (values.length < 2) return json_({ ok: true, booked: [] });
+
+    var headers = values[0];
+    var dateCol = headers.indexOf("date");
+    var timeCol = headers.indexOf("time");
+    if (dateCol === -1 || timeCol === -1) return json_({ ok: true, booked: [] });
+
+    var booked = [];
+    for (var i = 1; i < values.length; i++) {
+      if (normalizeDate_(values[i][dateCol]) !== date) continue;
+      var time = normalizeTime_(values[i][timeCol]);
+      if (time && booked.indexOf(time) === -1) booked.push(time);
+    }
+    return json_({ ok: true, booked: booked });
+  } catch (err) {
+    return json_({ ok: false, booked: [], error: String(err) });
+  }
+}
+
+/** Sheets may hand back a Date object or a string — normalize to "YYYY-MM-DD". */
+function normalizeDate_(value) {
+  if (value instanceof Date) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  }
+  return String(value).trim().slice(0, 10);
+}
+
+/** Normalize "12:00", "12:00:00" or a Date to "HH:mm". */
+function normalizeTime_(value) {
+  if (value instanceof Date) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), "HH:mm");
+  }
+  var match = String(value).trim().match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return "";
+  return (match[1].length === 1 ? "0" + match[1] : match[1]) + ":" + match[2];
 }
 
 function appendRow_(tabName, headers, data) {

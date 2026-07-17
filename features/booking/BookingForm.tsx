@@ -1,14 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  Check,
-  CheckCircle2,
-  Clock,
-} from "lucide-react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Loader2 } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import {
@@ -18,6 +11,14 @@ import {
   getServiceFullName,
 } from "@/lib/services";
 import { cn, formatPrice } from "@/lib/utils";
+import {
+  formatDayLong,
+  formatDayParts,
+  formatSlotLabel,
+  getBookableDays,
+  getSlots,
+  isSlotInPast,
+} from "@/lib/slots";
 import { submitToSheet } from "@/lib/submit";
 import { Button } from "@/components/ui/Button";
 import { ServiceIcon } from "@/components/ui/ServiceIcon";
@@ -29,6 +30,25 @@ import {
 } from "@/components/ui/FormFields";
 
 type Status = "idle" | "submitting" | "success" | "error";
+
+/**
+ * Client-only snapshot of the bookable days. The list is cached so the snapshot
+ * stays referentially stable (useSyncExternalStore requires that), and the
+ * server snapshot is empty so nothing date-dependent is prerendered.
+ */
+const NO_DAYS: string[] = [];
+let cachedDays: string[] | null = null;
+
+function subscribeNever() {
+  return () => {};
+}
+function getDaysSnapshot(): string[] {
+  if (!cachedDays) cachedDays = getBookableDays();
+  return cachedDays;
+}
+function getNoDays(): string[] {
+  return NO_DAYS;
+}
 
 interface FormState {
   serviceId: string;
@@ -67,8 +87,41 @@ export function BookingForm({
   const [status, setStatus] = useState<Status>("idle");
   const [submitError, setSubmitError] = useState<string>("");
 
+  // Booked slots per day, keyed by ISO date. A missing key means "not fetched
+  // yet", which is what drives the loading state — so both are derived, never
+  // set synchronously inside an effect.
+  const [availability, setAvailability] = useState<Record<string, string[]>>({});
+  const booked = form.date ? (availability[form.date] ?? []) : [];
+  const loadingSlots = Boolean(form.date) && availability[form.date] === undefined;
+
+  // Bookable days depend on "now". useSyncExternalStore keeps the server
+  // snapshot empty so the prerendered HTML never bakes in the build date (which
+  // would both go stale and cause a hydration mismatch).
+  const days = useSyncExternalStore(subscribeNever, getDaysSnapshot, getNoDays);
+
   const steps = [t.steps.service, t.steps.schedule, t.steps.details];
-  const today = new Date().toISOString().split("T")[0];
+  const slots = useMemo(() => getSlots(), []);
+
+  // Fetch availability for a day the first time it's selected. Fails open: on
+  // any error the day resolves to "nothing booked" so booking is never blocked.
+  useEffect(() => {
+    const date = form.date;
+    if (!date || availability[date] !== undefined) return;
+
+    let cancelled = false;
+    const record = (slotsTaken: string[]) => {
+      if (!cancelled) setAvailability((a) => ({ ...a, [date]: slotsTaken }));
+    };
+
+    fetch(`/api/availability?date=${date}`)
+      .then((r) => r.json())
+      .then((data) => record(Array.isArray(data?.booked) ? data.booked : []))
+      .catch(() => record([]));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [form.date, availability]);
 
   const selectedService = useMemo(
     () => services.find((s) => s.id === form.serviceId),
@@ -89,6 +142,7 @@ export function BookingForm({
     if (current === 1) {
       if (!form.date) next.date = t.errors.date;
       if (!form.time) next.time = t.errors.time;
+      else if (booked.includes(form.time)) next.time = t.errors.slotTaken;
     }
     if (current === 2) {
       if (!form.name.trim()) next.name = t.errors.name;
@@ -300,44 +354,117 @@ export function BookingForm({
             </div>
           ) : null}
 
-          {/* Step 2: Schedule */}
+          {/* Step 2: Schedule — pick a day, then a one-hour slot */}
           {step === 1 ? (
             <div>
               <h2 className="mb-5 text-lg font-semibold text-text-dark sm:text-xl">
                 {t.schedulePrompt}
               </h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="date">{t.fields.date}</Label>
-                  <div className="relative">
-                    <CalendarDays className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-text-dark/40 ltr:left-3.5 rtl:right-3.5" />
-                    <TextInput
-                      id="date"
-                      type="date"
-                      min={today}
-                      value={form.date}
-                      error={!!errors.date}
-                      onChange={(e) => update("date", e.target.value)}
-                      className="ltr:pl-10 rtl:pr-10"
-                    />
+
+              {/* Day picker: today + the next 7 days */}
+              <p className="mb-2 text-sm font-medium text-text-dark">
+                {t.fields.date}
+                <span className="text-accent"> *</span>
+              </p>
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+                {days.map((day) => {
+                  const parts = formatDayParts(day, locale);
+                  const active = form.date === day;
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => update("date", day)}
+                      aria-pressed={active}
+                      className={cn(
+                        "flex min-w-[4.5rem] shrink-0 flex-col items-center rounded-xl border px-3 py-2.5 transition-all",
+                        active
+                          ? "border-accent bg-primary-50/60 ring-1 ring-accent"
+                          : "border-primary-100 hover:border-primary-200 hover:bg-primary-50/30",
+                      )}
+                    >
+                      <span className="text-xs font-medium text-text-dark/60">
+                        {parts.weekday}
+                      </span>
+                      <span className="text-lg font-bold leading-tight text-text-dark">
+                        {parts.day}
+                      </span>
+                      <span className="text-xs text-text-dark/60">
+                        {parts.month}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <FieldError message={errors.date} />
+
+              {/* Slot picker */}
+              <div className="mt-6">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-text-dark">
+                    {t.fields.time}
+                    <span className="text-accent"> *</span>
+                  </p>
+                  <div className="flex items-center gap-4 text-xs text-text-dark/60">
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full border border-primary-200 bg-surface" />
+                      {t.slots.available}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                      {t.slots.booked}
+                    </span>
                   </div>
-                  <FieldError message={errors.date} />
                 </div>
-                <div>
-                  <Label htmlFor="time">{t.fields.time}</Label>
-                  <div className="relative">
-                    <Clock className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-text-dark/40 ltr:left-3.5 rtl:right-3.5" />
-                    <TextInput
-                      id="time"
-                      type="time"
-                      value={form.time}
-                      error={!!errors.time}
-                      onChange={(e) => update("time", e.target.value)}
-                      className="ltr:pl-10 rtl:pr-10"
-                    />
+
+                {!form.date ? (
+                  <p className="rounded-xl bg-primary-50/50 px-4 py-3 text-sm text-text-dark/60">
+                    {t.slots.pickDayFirst}
+                  </p>
+                ) : loadingSlots ? (
+                  <p className="flex items-center gap-2 rounded-xl bg-primary-50/50 px-4 py-3 text-sm text-text-dark/60">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t.slots.loading}
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {slots.map((slot) => {
+                      const isBooked = booked.includes(slot);
+                      const isPast = isSlotInPast(form.date, slot);
+                      const disabled = isBooked || isPast;
+                      const active = form.time === slot;
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          disabled={disabled}
+                          aria-disabled={disabled}
+                          title={
+                            isBooked
+                              ? t.slots.bookedTitle
+                              : isPast
+                                ? t.slots.pastTitle
+                                : undefined
+                          }
+                          onClick={() => update("time", slot)}
+                          className={cn(
+                            "rounded-xl border px-2 py-2.5 text-sm font-medium transition-all",
+                            isBooked
+                              ? "cursor-not-allowed border-red-200 bg-red-50 text-red-600 line-through"
+                              : isPast
+                                ? "cursor-not-allowed border-primary-100 bg-primary-50/40 text-text-dark/30"
+                                : active
+                                  ? "border-accent bg-primary-50/60 text-primary ring-1 ring-accent"
+                                  : "border-primary-100 text-text-dark hover:border-primary-200 hover:bg-primary-50/30",
+                          )}
+                        >
+                          {formatSlotLabel(slot, locale)}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <FieldError message={errors.time} />
-                </div>
+                )}
+                <FieldError message={errors.time} />
               </div>
 
               {selectionLabel ? (
@@ -494,8 +621,13 @@ function SummaryRows({
       label: dict.services.pricingLabel,
       value: `${formatPrice(price, locale)} ${dict.common.egp}`,
     });
-  if (date) rows.push({ label: dict.booking.fields.date, value: date });
-  if (time) rows.push({ label: dict.booking.fields.time, value: time });
+  if (date)
+    rows.push({ label: dict.booking.fields.date, value: formatDayLong(date, locale) });
+  if (time)
+    rows.push({
+      label: dict.booking.fields.time,
+      value: formatSlotLabel(time, locale),
+    });
 
   return (
     <dl className="divide-y divide-primary-100">
