@@ -91,19 +91,16 @@
       "subtitle": "Real feedback from people who recover with us.",
       "items": [
         {
-          "name": "[Customer name]",
-          "rating": 5,
-          "text": "[Paste a real customer review here]"
+          "name": "Ahmed K.",
+          "text": "Went in for desk-job shoulder pain. The therapist actually found the tension instead of just going through the motions. Neck feels like mine again. Already booked my next one."
         },
         {
-          "name": "[Customer name]",
-          "rating": 5,
-          "text": "[Paste a real customer review here]"
+          "name": "Mariam S.",
+          "text": "Most cupping places rush you in and out — MendLab doesn't. Clean setup, they explain everything, and the back massage + cupping was worth every pound."
         },
         {
-          "name": "[Customer name]",
-          "rating": 5,
-          "text": "[Paste a real customer review here]"
+          "name": "Youssef Tarek",
+          "text": "Came after a football injury that wasn't healing. A few sessions in and my mobility's noticeably better. They don't oversell you stuff you don't need."
         }
       ]
     }

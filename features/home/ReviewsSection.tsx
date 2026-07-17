@@ -1,4 +1,4 @@
-import { Quote, Star } from "lucide-react";
+import { Quote } from "lucide-react";
 import type { LocalizedProps } from "@/types";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
@@ -30,24 +30,7 @@ export function ReviewsSection({ dict }: LocalizedProps) {
                 {review.text}
               </p>
               <div className="mt-5 border-t border-primary-100 pt-4">
-                <div
-                  className="flex gap-0.5"
-                  role="img"
-                  aria-label={`${review.rating} / 5`}
-                >
-                  {Array.from({ length: 5 }, (_, s) => (
-                    <Star
-                      key={s}
-                      className={
-                        s < review.rating
-                          ? "h-4 w-4 fill-accent text-accent"
-                          : "h-4 w-4 text-primary-200"
-                      }
-                      aria-hidden="true"
-                    />
-                  ))}
-                </div>
-                <p className="mt-2 text-sm font-semibold text-text-dark">
+                <p className="text-sm font-semibold text-text-dark">
                   {review.name}
                 </p>
               </div>
