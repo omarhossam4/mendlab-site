@@ -25,10 +25,11 @@ export function Logo({
   variant?: "dark" | "light";
 }) {
   const [failed, setFailed] = useState(false);
-  // Dark variant (light backgrounds) uses the real transparent PNG logo.
-  // Light variant (dark footer) uses a white version — drop /logo/logo-white.svg
-  // (or .png) to replace the inline white wordmark fallback.
-  const src = variant === "light" ? "/logo/logo-white.svg" : "/logo/logo.png";
+  // Both variants use the real transparent PNG logo. On the dark footer
+  // (`light`) it's flipped to solid white with a CSS invert filter so the same
+  // lockup reads cleanly on the dark background.
+  const src = "/logo/logo.png";
+  const imgFilter = variant === "light" ? "brightness-0 invert" : "";
   const textColor = variant === "light" ? "text-white" : "text-primary-dark";
   const markColor = variant === "light" ? "#ffffff" : "#0A4A55";
 
@@ -45,7 +46,7 @@ export function Logo({
           width={293}
           height={160}
           priority
-          className="h-14 w-auto sm:h-16 lg:h-[4.5rem]"
+          className={`h-14 w-auto sm:h-16 lg:h-[4.5rem] ${imgFilter}`}
           onError={() => setFailed(true)}
         />
       ) : (
