@@ -1,20 +1,34 @@
 /**
  * Booking availability helpers.
  *
- * MendLab runs twelve one-hour slots from 12:00 PM to 12:00 AM, bookable for
- * today plus the next seven days.
+ * MendLab runs twelve one-hour slots from 3:00 PM to 3:00 AM. Fridays are a
+ * holiday and are never offered.
  *
- * A slot id is `"<startHour>-<endHour>"` in 24h form — "12-13" … "23-24".
+ * The window runs past midnight, but every slot belongs to the SAME evening's
+ * date — so a single selected day is one continuous 3 PM → 3 AM night. To keep
+ * that grouping (and keep ids sortable), the after-midnight hours are encoded as
+ * 24 = 12 AM, 25 = 1 AM, 26 = 2 AM.
+ *
+ * A slot id is `"<startHour>-<endHour>"` in this 24h+ form — "15-16" … "26-27".
  * This is the Apps Script's `slotId` format (see Code.gs `generateTimeSlots`),
  * and it's what lands in the sheet's TimeSlot column, so don't change it on one
  * side without the other.
  */
 
-/** Slot start hours: 12, 13 … 23. */
-const SLOT_START_HOURS = Array.from({ length: 12 }, (_, i) => i + 12);
+/** Slot start hours: 15, 16 … 23, 24(12 AM), 25(1 AM), 26(2 AM). */
+const SLOT_START_HOURS = Array.from({ length: 12 }, (_, i) => i + 15);
 
-/** How many days ahead are bookable (today + next 7). */
+/** How many bookable days to offer (today plus following days, Fridays skipped). */
 export const BOOKABLE_DAYS = 8;
+
+/** Day-of-week that is a holiday (0 = Sunday … 5 = Friday). */
+const HOLIDAY_WEEKDAY = 5;
+
+/** True if the given ISO date falls on the weekly holiday (Friday). */
+export function isHoliday(iso: string): boolean {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).getDay() === HOLIDAY_WEEKDAY;
+}
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -36,15 +50,19 @@ function slotStartHour(slotId: string): number {
 }
 
 /**
- * Bookable dates as ISO strings, starting today.
- * Must be called on the client — it depends on "now".
+ * Bookable dates as ISO strings, starting today and skipping Fridays.
+ * Returns `count` non-holiday days. Must be called on the client — it depends
+ * on "now".
  */
 export function getBookableDays(count: number = BOOKABLE_DAYS): string[] {
   const now = new Date();
-  return Array.from({ length: count }, (_, i) => {
+  const days: string[] = [];
+  for (let i = 0; days.length < count; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    return toISODate(d);
-  });
+    const iso = toISODate(d);
+    if (!isHoliday(iso)) days.push(iso);
+  }
+  return days;
 }
 
 function intlLocale(locale: string) {
