@@ -175,6 +175,13 @@ function now_() {
 
 function getSheet_(tabName, createIfMissing) {
   var ss = SHEET_ID ? SpreadsheetApp.openById(SHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) {
+    throw new Error(
+      "No spreadsheet found. This script isn't bound to a Sheet. Open your " +
+      "Google Sheet -> Extensions -> Apps Script, OR set SHEET_ID at the top " +
+      "to your sheet id (the part between /d/ and /edit in the sheet URL)."
+    );
+  }
   var sheet = ss.getSheetByName(tabName);
   if (!sheet && createIfMissing) sheet = ss.insertSheet(tabName);
   return sheet;
@@ -191,10 +198,16 @@ function json_(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-/** Run once from the editor to confirm writing to the sheet works. */
+/**
+ * Run THIS one from the editor to confirm writing to the sheet works.
+ * (Never run doGet/doPost from the editor — they need a live web request.)
+ * The first run asks you to authorize the script: Review permissions ->
+ * choose your account -> Advanced -> "Go to project (unsafe)" -> Allow.
+ */
 function testWrite() {
   appendRow_(BOOKINGS_TAB, BOOKING_HEADERS, [
     now_(), "2026-01-01", "15-16", "Booked",
     "Test User", "0000000000", "Test service", "0 EGP", "", "manual test", "en",
   ]);
+  Logger.log("testWrite OK — a row was added to the '" + BOOKINGS_TAB + "' tab.");
 }
