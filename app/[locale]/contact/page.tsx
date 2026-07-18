@@ -125,30 +125,30 @@ export default async function ContactPage({
               </div>
             </div>
 
-            {/* Map — opens the clinic's real Google Maps location */}
-            <a
-              href={contactDetails.mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-3xl border border-primary-100 bg-primary-50/60 transition-colors hover:border-primary-200"
-            >
-              <div className="hex-pattern absolute inset-0 opacity-40" />
-              <div className="relative flex flex-col items-center gap-2 text-primary/80">
-                <MapPin className="h-8 w-8 transition-transform group-hover:scale-110" />
-                <span className="text-sm font-semibold">
-                  {dict.contact.mapPlaceholder}
-                </span>
-              </div>
-            </a>
+            {/* Live embedded map of the clinic */}
+            <div className="overflow-hidden rounded-3xl border border-primary-100 shadow-sm">
+              <iframe
+                src={contactDetails.mapsEmbedUrl}
+                title={dict.meta.siteName}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="aspect-[16/10] w-full border-0"
+                allowFullScreen
+              />
+              <a
+                href={contactDetails.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-primary-dark px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary"
+              >
+                <MapPin className="h-4 w-4" />
+                {dict.contact.mapPlaceholder}
+              </a>
+            </div>
           </div>
 
-          {/* Form */}
-          <Card>
-            <h2 className="mb-6 text-xl font-bold text-text-dark">
-              {dict.contact.form.title}
-            </h2>
-            <ContactForm locale={locale} dict={dict} />
-          </Card>
+          {/* WhatsApp contact */}
+          <ContactForm locale={locale} dict={dict} />
         </div>
       </Section>
     </>

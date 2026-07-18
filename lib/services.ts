@@ -38,7 +38,7 @@ export const services: Service[] = [
   {
     id: "upper-package",
     slug: "upper-package",
-    image: "/images/service-flash-cupping.jpg",
+    image: "/images/recovery massage new.jpeg",
     priceEGP: 600,
   },
   {

@@ -309,18 +309,14 @@
     },
     "mapPlaceholder": "View on Google Maps",
     "form": {
-      "title": "Send us a message",
+      "title": "Chat with us on WhatsApp",
+      "subtitle": "The fastest way to reach us. Tell us what you need and we'll reply in minutes.",
       "name": "Full name",
-      "email": "Email address",
-      "phone": "Phone number",
       "message": "Message",
       "messagePlaceholder": "How can we help?",
-      "submit": "Send Message",
-      "submitting": "Sending…",
-      "success": "Thanks! Your message has been sent — we'll be in touch soon.",
-      "error": "Something went wrong. Please try again or call us.",
+      "whatsappCta": "Chat on WhatsApp",
+      "whatsappHint": "Opens WhatsApp with your message ready to send.",
       "errName": "Please enter your name.",
-      "errEmail": "Please enter a valid email address.",
       "errMessage": "Please enter a message."
     }
   },

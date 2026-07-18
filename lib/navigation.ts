@@ -27,5 +27,13 @@ export const contactDetails = {
   phoneDisplay: "+20 104 151 2677",
   phoneHref: "tel:+201041512677",
   email: "mendlabeg@gmail.com",
+  // Opens the exact pin in Google Maps / the Maps app.
   mapsUrl: "https://maps.app.goo.gl/Sveb77vnntvy9zFj8?g_st=ic",
+  // Embeddable map (no API key needed) centred on the clinic — V8 Gym,
+  // Sevora Plaza tower, Al Sad Al Aali, Nasr City, Cairo.
+  mapsEmbedUrl:
+    "https://www.google.com/maps?q=V8%20Gym%2C%20Sevora%20Plaza%2C%20Al%20Sad%20Al%20Aali%2C%20Nasr%20City%2C%20Cairo&z=16&output=embed",
+  // WhatsApp chat (wa.me needs the number in international form, no +).
+  whatsappNumber: "201041512677",
+  whatsappUrl: "https://wa.me/201041512677",
 };
