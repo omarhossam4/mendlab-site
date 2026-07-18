@@ -5,7 +5,6 @@ import { Hero } from "@/features/home/Hero";
 import { MissionSection } from "@/features/home/MissionSection";
 import { WhySection } from "@/features/home/WhySection";
 import { ServicesPreview } from "@/features/home/ServicesPreview";
-import { ReviewsSection } from "@/features/home/ReviewsSection";
 import { CtaSection } from "@/features/home/CtaSection";
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
@@ -19,7 +18,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <MissionSection locale={locale} dict={dict} />
       <WhySection locale={locale} dict={dict} />
       <ServicesPreview locale={locale} dict={dict} />
-      <ReviewsSection locale={locale} dict={dict} />
       <CtaSection locale={locale} dict={dict} />
     </>
   );
