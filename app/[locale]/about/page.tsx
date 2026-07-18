@@ -8,8 +8,8 @@ import { Section, SectionHeading } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { PageHero } from "@/components/layout/PageHero";
-import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { Reveal } from "@/components/ui/Reveal";
+import { AboutBrandMark } from "@/features/about/AboutBrandMark";
 
 const valueIcons: LucideIcon[] = [BadgeCheck, ShieldCheck, Heart, Target];
 
@@ -38,11 +38,7 @@ export default async function AboutPage({
       <Section>
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal>
-            <ImagePlaceholder
-              src="/images/about-clinic.jpg"
-              alt={t.story.title}
-              className="aspect-[4/3] rounded-3xl"
-            />
+            <AboutBrandMark alt={dict.meta.siteName} />
           </Reveal>
           <Reveal delay={0.1}>
             <div className="space-y-8">
@@ -97,26 +93,19 @@ export default async function AboutPage({
         <Container>
           <SectionHeading title={t.leadership.title} />
           <Reveal>
-            <Card className="mx-auto mt-12 max-w-4xl overflow-hidden p-0">
-              <div className="grid gap-0 sm:grid-cols-[minmax(0,240px)_1fr]">
-                <ImagePlaceholder
-                  src="/images/leadership-ahmed-hosny.jpg"
-                  alt={t.leadership.name}
-                  label={t.leadership.name}
-                  className="min-h-56 sm:min-h-full"
-                />
-                <div className="p-7 sm:p-9">
-                  <h3 className="text-2xl font-bold text-text-dark">
-                    {t.leadership.name}
-                  </h3>
-                  <p className="mt-1 text-sm font-semibold uppercase tracking-wider text-accent">
-                    {t.leadership.role}
-                  </p>
-                  <p className="mt-5 leading-relaxed text-text-dark/75">
-                    {t.leadership.bio}
-                  </p>
-                </div>
-              </div>
+            <Card className="mx-auto mt-12 max-w-3xl p-8 text-center sm:p-10">
+              <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-2xl font-bold text-white">
+                {t.leadership.name.trim().charAt(0)}
+              </span>
+              <h3 className="mt-5 text-2xl font-bold text-text-dark">
+                {t.leadership.name}
+              </h3>
+              <p className="mt-1 text-sm font-semibold uppercase tracking-wider text-accent">
+                {t.leadership.role}
+              </p>
+              <p className="mx-auto mt-5 max-w-2xl leading-relaxed text-text-dark/75">
+                {t.leadership.bio}
+              </p>
             </Card>
           </Reveal>
         </Container>

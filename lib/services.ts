@@ -32,7 +32,7 @@ export const services: Service[] = [
   {
     id: "upper-massage",
     slug: "upper-massage",
-    image: "/images/service-recovery-massage.jpg",
+    image: "/images/upper body massage new.jpeg",
     priceEGP: 550,
   },
   {
@@ -44,13 +44,13 @@ export const services: Service[] = [
   {
     id: "full-body-massage",
     slug: "full-body-massage",
-    image: "/images/service-dry-needling.jpg",
+    image: "/images/full body massage new.jpeg",
     priceEGP: 700,
   },
   {
     id: "full-body-package",
     slug: "full-body-package",
-    image: "/images/service-dry-cupping.jpg",
+    image: "/images/Full Body Package.jpg",
     priceEGP: 800,
   },
 ];
