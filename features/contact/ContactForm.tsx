@@ -98,7 +98,7 @@ export function ContactForm({
 
         <button
           type="submit"
-          className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:bg-[#1ebe5b] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366]"
+          className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-primary px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <WhatsAppGlyph className="h-5 w-5" />
           {t.whatsappCta}
