@@ -10,9 +10,9 @@
  *          locale }
  *        -> { success: true }  |  { success: false, error: "..." }
  *
- * Hours: twelve one-hour slots, 3:00 PM to 3:00 AM. After-midnight hours are
- * encoded 24 = 12 AM, 25 = 1 AM, 26 = 2 AM so each slot stays on the SAME
- * evening's date. Fridays are a holiday and are rejected.
+ * Hours: twelve one-hour slots, 3:00 PM to 3:00 AM, every day. After-midnight
+ * hours are encoded 24 = 12 AM, 25 = 1 AM, 26 = 2 AM so each slot stays on the
+ * SAME evening's date.
  *
  * PRIVACY: the getSlots response contains ONLY slot ids + an available flag —
  * never names, phones, emails or notes.
@@ -32,7 +32,6 @@ var CONTACTS_TAB = "Contacts";
 // Slot start hours: 15..23, then 24(12AM), 25(1AM), 26(2AM).
 var FIRST_SLOT_HOUR = 15;
 var SLOT_COUNT = 12;
-var FRIDAY = 5; // Date.getDay(): Sun=0 ... Fri=5
 
 var BOOKING_HEADERS = [
   "Timestamp", "Date", "TimeSlot", "Status",
@@ -84,9 +83,6 @@ function doPost(e) {
     var slotId = String(data.slotId || "");
     if (!date || !slotId) {
       return json_({ success: false, error: "Missing date or slot." });
-    }
-    if (isFriday_(date)) {
-      return json_({ success: false, error: "We're closed on Fridays." });
     }
 
     // Serialize the check-and-write so two people can't grab the same slot.
@@ -154,11 +150,6 @@ function getBookedSlotIds_(date) {
     if (id && booked.indexOf(id) === -1) booked.push(id);
   }
   return booked;
-}
-
-function isFriday_(date) {
-  var p = date.split("-");
-  return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).getDay() === FRIDAY;
 }
 
 /** Sheets may return a Date or a string — normalize to "YYYY-MM-DD". */

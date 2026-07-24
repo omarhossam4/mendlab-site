@@ -1,8 +1,7 @@
 /**
  * Booking availability helpers.
  *
- * MendLab runs twelve one-hour slots from 3:00 PM to 3:00 AM. Fridays are a
- * holiday and are never offered.
+ * MendLab runs twelve one-hour slots from 3:00 PM to 3:00 AM, every day.
  *
  * The window runs past midnight, but every slot belongs to the SAME evening's
  * date — so a single selected day is one continuous 3 PM → 3 AM night. To keep
@@ -18,17 +17,8 @@
 /** Slot start hours: 15, 16 … 23, 24(12 AM), 25(1 AM), 26(2 AM). */
 const SLOT_START_HOURS = Array.from({ length: 12 }, (_, i) => i + 15);
 
-/** How many bookable days to offer (today plus following days, Fridays skipped). */
+/** How many days ahead are bookable (today + next 7). */
 export const BOOKABLE_DAYS = 8;
-
-/** Day-of-week that is a holiday (0 = Sunday … 5 = Friday). */
-const HOLIDAY_WEEKDAY = 5;
-
-/** True if the given ISO date falls on the weekly holiday (Friday). */
-export function isHoliday(iso: string): boolean {
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(y, m - 1, d).getDay() === HOLIDAY_WEEKDAY;
-}
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -50,19 +40,15 @@ function slotStartHour(slotId: string): number {
 }
 
 /**
- * Bookable dates as ISO strings, starting today and skipping Fridays.
- * Returns `count` non-holiday days. Must be called on the client — it depends
- * on "now".
+ * Bookable dates as ISO strings, starting today.
+ * Must be called on the client — it depends on "now".
  */
 export function getBookableDays(count: number = BOOKABLE_DAYS): string[] {
   const now = new Date();
-  const days: string[] = [];
-  for (let i = 0; days.length < count; i++) {
+  return Array.from({ length: count }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    const iso = toISODate(d);
-    if (!isHoliday(iso)) days.push(iso);
-  }
-  return days;
+    return toISODate(d);
+  });
 }
 
 function intlLocale(locale: string) {
