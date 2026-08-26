@@ -49,7 +49,7 @@ function getNoDays(): string[] {
  * matched case-insensitively (see applyPromo).
  */
 const PROMO_CODES: Record<string, number> = {
-  OYALTY20: 20,
+  LOYALTY20: 20,
 };
 
 /** Price after applying a whole-percent discount, rounded to the nearest EGP. */
