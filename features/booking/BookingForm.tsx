@@ -44,6 +44,19 @@ function getNoDays(): string[] {
   return NO_DAYS;
 }
 
+/**
+ * Promo codes and the percentage they take off the service price. Codes are
+ * matched case-insensitively (see applyPromo).
+ */
+const PROMO_CODES: Record<string, number> = {
+  OYALTY20: 20,
+};
+
+/** Price after applying a whole-percent discount, rounded to the nearest EGP. */
+function discountedPrice(price: number, percent: number): number {
+  return Math.round(price * (1 - percent / 100));
+}
+
 interface FormState {
   serviceId: string;
   date: string;
@@ -80,6 +93,12 @@ export function BookingForm({
   );
   const [status, setStatus] = useState<Status>("idle");
   const [submitError, setSubmitError] = useState<string>("");
+
+  // Promo code: the text the user is typing, the applied discount percentage
+  // (0 when none), and a "not valid" message shown under the input.
+  const [promoInput, setPromoInput] = useState("");
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [promoError, setPromoError] = useState("");
 
   // Booked slots per day, keyed by ISO date. A missing key means "not fetched
   // yet", which is what drives the loading state — so both are derived, never
@@ -130,6 +149,23 @@ export function BookingForm({
     setErrors((e) => ({ ...e, [key]: undefined }));
   }
 
+  function applyPromo() {
+    const percent = PROMO_CODES[promoInput.trim().toUpperCase()];
+    if (percent) {
+      setDiscountPercent(percent);
+      setPromoError("");
+    } else {
+      setDiscountPercent(0);
+      setPromoError(t.promo.invalid);
+    }
+  }
+
+  function removePromo() {
+    setDiscountPercent(0);
+    setPromoInput("");
+    setPromoError("");
+  }
+
   function validateStep(current: number): boolean {
     const next: Partial<Record<keyof FormState, string>> = {};
     if (current === 0 && !form.serviceId) next.serviceId = t.errors.service;
@@ -164,13 +200,19 @@ export function BookingForm({
     // Field names match the Apps Script's doPost contract exactly
     // (date, slotId, customerName, phone, service). Extra fields are ignored
     // by the script until columns exist for them.
+    const finalPrice = selectedService
+      ? discountedPrice(selectedService.priceEGP, discountPercent)
+      : 0;
+
     const result = await submitToSheet("booking", {
       date: form.date,
       slotId: form.time,
       customerName: form.name,
       phone: form.phone,
       service: selectionLabel,
-      price: selectedService ? `${selectedService.priceEGP} EGP` : "",
+      price: selectedService ? `${finalPrice} EGP` : "",
+      promoCode: discountPercent ? promoInput.trim().toUpperCase() : "",
+      discount: discountPercent ? `${discountPercent}%` : "",
       email: form.email,
       notes: form.notes,
       locale,
@@ -208,6 +250,7 @@ export function BookingForm({
     setStep(0);
     setStatus("idle");
     setSubmitError("");
+    removePromo();
   }
 
   if (status === "success") {
@@ -226,6 +269,7 @@ export function BookingForm({
             locale={locale}
             selectionLabel={selectionLabel}
             price={selectedService?.priceEGP}
+            discountPercent={discountPercent}
             date={form.date}
             time={form.time}
           />
@@ -531,6 +575,59 @@ export function BookingForm({
                 </div>
               </div>
 
+              {/* Promo code */}
+              <div className="mt-6">
+                <Label htmlFor="promo" optional>
+                  {t.promo.label}
+                </Label>
+                {discountPercent ? (
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-accent bg-primary-50/60 px-4 py-3">
+                    <span className="flex items-center gap-2 text-sm font-semibold text-accent">
+                      <CheckCircle2 className="h-4 w-4" />
+                      {t.promo.applied.replace("{percent}", String(discountPercent))}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={removePromo}
+                      className="text-sm font-medium text-text-dark/60 underline hover:text-text-dark"
+                    >
+                      {t.promo.remove}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <TextInput
+                      id="promo"
+                      value={promoInput}
+                      placeholder={t.promo.placeholder}
+                      error={!!promoError}
+                      dir="ltr"
+                      autoCapitalize="characters"
+                      onChange={(e) => {
+                        setPromoInput(e.target.value);
+                        if (promoError) setPromoError("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          applyPromo();
+                        }
+                      }}
+                      className={cn("flex-1", isRtl ? "text-right" : "text-left")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={applyPromo}
+                      disabled={!promoInput.trim()}
+                    >
+                      {t.promo.apply}
+                    </Button>
+                  </div>
+                )}
+                <FieldError message={promoError} />
+              </div>
+
               {/* Review summary */}
               <div className="mt-6 rounded-2xl border border-primary-100 bg-primary-50/40 p-4">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-accent">
@@ -541,6 +638,7 @@ export function BookingForm({
                   locale={locale}
                   selectionLabel={selectionLabel}
                   price={selectedService?.priceEGP}
+                  discountPercent={discountPercent}
                   date={form.date}
                   time={form.time}
                 />
@@ -591,6 +689,7 @@ function SummaryRows({
   locale,
   selectionLabel,
   price,
+  discountPercent = 0,
   date,
   time,
 }: {
@@ -598,17 +697,43 @@ function SummaryRows({
   locale: Locale;
   selectionLabel: string;
   price?: number;
+  discountPercent?: number;
   date?: string;
   time?: string;
 }) {
-  const rows: { label: string; value: string }[] = [];
+  const egp = dict.common.egp;
+  const hasDiscount = Boolean(price) && discountPercent > 0;
+  const rows: {
+    label: string;
+    value: string;
+    strike?: boolean;
+    emphasis?: boolean;
+  }[] = [];
+
   if (selectionLabel)
     rows.push({ label: dict.booking.steps.service, value: selectionLabel });
   if (price)
     rows.push({
+      // When discounted, this line shows the original price struck through.
       label: dict.services.pricingLabel,
-      value: `${formatPrice(price, locale)} ${dict.common.egp}`,
+      value: `${formatPrice(price, locale)} ${egp}`,
+      strike: hasDiscount,
     });
+  if (price && hasDiscount) {
+    const off = price - discountedPrice(price, discountPercent);
+    rows.push({
+      label: dict.booking.promo.discount.replace(
+        "{percent}",
+        String(discountPercent),
+      ),
+      value: `− ${formatPrice(off, locale)} ${egp}`,
+    });
+    rows.push({
+      label: dict.booking.promo.total,
+      value: `${formatPrice(discountedPrice(price, discountPercent), locale)} ${egp}`,
+      emphasis: true,
+    });
+  }
   if (date)
     rows.push({ label: dict.booking.fields.date, value: formatDayLong(date, locale) });
   if (time)
@@ -625,7 +750,15 @@ function SummaryRows({
           className="flex items-center justify-between gap-4 py-1.5"
         >
           <dt className="text-text-dark/60">{row.label}</dt>
-          <dd className="text-end font-semibold text-text-dark">{row.value}</dd>
+          <dd
+            className={cn(
+              "text-end font-semibold",
+              row.strike && "text-text-dark/50 line-through",
+              row.emphasis ? "text-accent" : "text-text-dark",
+            )}
+          >
+            {row.value}
+          </dd>
         </div>
       ))}
     </dl>

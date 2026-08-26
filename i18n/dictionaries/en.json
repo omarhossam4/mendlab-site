@@ -292,6 +292,16 @@
       "pickDayFirst": "Choose a day above to see available times.",
       "bookedTitle": "Already booked",
       "pastTitle": "This time has passed"
+    },
+    "promo": {
+      "label": "Promo code",
+      "placeholder": "Enter code",
+      "apply": "Apply",
+      "remove": "Remove",
+      "applied": "Code applied — {percent}% off!",
+      "invalid": "That code isn't valid.",
+      "discount": "Discount ({percent}%)",
+      "total": "Total"
     }
   },
   "contact": {

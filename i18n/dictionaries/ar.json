@@ -292,6 +292,16 @@
       "pickDayFirst": "اختر يومًا بالأعلى لعرض الأوقات المتاحة.",
       "bookedTitle": "محجوز بالفعل",
       "pastTitle": "انتهى هذا الوقت"
+    },
+    "promo": {
+      "label": "كود الخصم",
+      "placeholder": "أدخل الكود",
+      "apply": "تطبيق",
+      "remove": "إزالة",
+      "applied": "تم تطبيق الكود — خصم {percent}%!",
+      "invalid": "هذا الكود غير صالح.",
+      "discount": "الخصم ({percent}%)",
+      "total": "الإجمالي"
     }
   },
   "contact": {
