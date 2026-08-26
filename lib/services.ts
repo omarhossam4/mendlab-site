@@ -9,11 +9,22 @@
 
 import type { Dictionary } from "@/i18n/dictionaries";
 
+/**
+ * Some services require the customer to pick a body area (Upper or Lower)
+ * before booking. `areaGroup` names the set of localized labels to use for that
+ * choice (see `booking.areas.groups.<areaGroup>` in the dictionaries). A service
+ * without `areaGroup` needs no area choice.
+ */
+export type AreaGroup = "massage" | "cupping";
+export const AREA_OPTIONS = ["upper", "lower"] as const;
+export type AreaOption = (typeof AREA_OPTIONS)[number];
+
 export interface Service {
   id: string;
   slug: string;
   image: string;
   priceEGP: number;
+  areaGroup?: AreaGroup;
 }
 
 export const services: Service[] = [
@@ -22,6 +33,13 @@ export const services: Service[] = [
     slug: "wet-dry-cupping",
     image: "/images/service-wet-cupping.jpg",
     priceEGP: 400,
+    areaGroup: "cupping",
+  },
+  {
+    id: "full-body-cupping",
+    slug: "full-body-cupping",
+    image: "/images/service-dry-cupping.jpg",
+    priceEGP: 600,
   },
   {
     id: "back-massage-cupping",
@@ -34,6 +52,7 @@ export const services: Service[] = [
     slug: "upper-massage",
     image: "/images/upper body massage new.jpeg",
     priceEGP: 550,
+    areaGroup: "massage",
   },
   {
     id: "upper-package",
@@ -57,6 +76,14 @@ export const services: Service[] = [
 
 export function getService(slug: string): Service | undefined {
   return services.find((s) => s.slug === slug);
+}
+
+/** A booking deposit is 50% of the (charged) session price. */
+export const DEPOSIT_RATE = 0.5;
+
+/** Deposit amount in EGP, rounded to the nearest pound. */
+export function depositFor(sessionPriceEGP: number): number {
+  return Math.round(sessionPriceEGP * DEPOSIT_RATE);
 }
 
 /** Translatable copy for a single service. */

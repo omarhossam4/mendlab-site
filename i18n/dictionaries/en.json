@@ -97,19 +97,36 @@
     "bookThis": "Book this service",
     "items": {
       "wet-dry-cupping": {
-        "name": "Wet/Dry Cupping Therapy",
-        "short": "Helps detoxify the body, improve circulation and relieve pain.",
-        "description": "Traditional cupping therapy — wet or dry, chosen to suit you — using controlled suction to decompress tissue. It helps detoxify the body, improve circulation and relieve pain.",
+        "name": "Upper / Lower Cupping Therapy",
+        "short": "Targeted cupping for the upper or lower body — you choose the area.",
+        "description": "Targeted cupping therapy for the upper or lower body — you choose the area — using controlled suction to decompress tissue. It helps detoxify the body, improve circulation and relieve pain.",
         "howItWorks": [
+          "You choose whether to treat the upper or lower body.",
           "Your therapist assesses the area and prepares the skin under strict hygiene.",
           "Cups are applied and the suction is adjusted to your comfort.",
-          "For wet cupping, sterile single-use tools are used throughout.",
           "Cups are removed and the area is cleaned and assessed."
         ],
         "benefits": [
           "Detoxification support",
           "Improved circulation",
           "Pain relief",
+          "Reduced muscle tension"
+        ]
+      },
+      "full-body-cupping": {
+        "name": "Full Body Cupping Therapy",
+        "short": "Whole-body cupping to detoxify, boost circulation and relieve pain.",
+        "description": "A complete cupping session covering the upper and lower body, using controlled suction to decompress tissue from head to toe. It helps detoxify the body, improve circulation and relieve widespread tension.",
+        "howItWorks": [
+          "A full assessment maps the areas that need the most work.",
+          "The skin is prepared under strict hygiene across the body.",
+          "Cups are applied to the upper and lower body and adjusted to your comfort.",
+          "Cups are removed and each area is cleaned and assessed."
+        ],
+        "benefits": [
+          "Whole-body detoxification support",
+          "Improved circulation",
+          "Widespread pain relief",
           "Reduced muscle tension"
         ]
       },
@@ -131,13 +148,13 @@
         ]
       },
       "upper-massage": {
-        "name": "Upper Massage",
-        "short": "Targets the neck, shoulders, upper back and arms.",
-        "description": "A targeted massage for the upper body — neck, shoulders, upper back and arms. Ideal where training load and daily posture build up the most tension.",
+        "name": "Upper / Lower Massage",
+        "short": "Targeted massage for the upper or lower body — you choose the area.",
+        "description": "A targeted massage for the upper or lower body — you choose the area. Upper focuses on the neck, shoulders, upper back and arms; lower focuses on the lower back, glutes and legs. Ideal where training load and daily posture build up the most tension.",
         "howItWorks": [
+          "You choose whether to treat the upper or lower body.",
           "A short assessment identifies tight and overloaded areas.",
-          "Targeted techniques treat the neck, shoulders, upper back and arms.",
-          "Pressure is tailored to your comfort and your therapist's recommendation.",
+          "Targeted techniques treat the chosen area.",
           "The session closes with mobility work for the area."
         ],
         "benefits": [
@@ -302,6 +319,36 @@
       "invalid": "That code isn't valid.",
       "discount": "Discount ({percent}%)",
       "total": "Total"
+    },
+    "areas": {
+      "prompt": "Choose your area",
+      "required": "Please choose Upper or Lower.",
+      "label": "Area",
+      "groups": {
+        "massage": {
+          "upper": "Upper Massage",
+          "lower": "Lower Massage"
+        },
+        "cupping": {
+          "upper": "Upper Cupping",
+          "lower": "Lower Cupping"
+        }
+      }
+    },
+    "deposit": {
+      "label": "Deposit (50%)",
+      "note": "50% of the session price, due at least 6 hours before your session."
+    },
+    "policy": {
+      "title": "Booking Policy",
+      "points": [
+        "A 50% deposit of the session price is required to confirm your booking.",
+        "The deposit must be paid at least 6 hours before the session.",
+        "If you cancel less than 6 hours before your appointment, the 50% deposit is non-refundable.",
+        "If you book another session after cancelling less than 6 hours before your appointment, a new 50% deposit is required."
+      ],
+      "accept": "I have read and agree to the booking policies.",
+      "acceptError": "Please read and accept the booking policies to continue."
     }
   },
   "contact": {

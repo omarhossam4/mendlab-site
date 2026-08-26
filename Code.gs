@@ -6,9 +6,13 @@
  *   GET  ?action=getSlots&date=YYYY-MM-DD
  *        -> { success: true, date, slots: [{ id: "15-16", label, available }] }
  *
- *   POST { date, slotId, customerName, phone, service, price, email, notes,
- *          locale }
+ *   POST { date, slotId, customerName, phone, service, area, price, deposit,
+ *          policyAccepted, email, notes, locale }
  *        -> { success: true }  |  { success: false, error: "..." }
+ *
+ * The deposit is ALWAYS recomputed server-side as 50% of the numeric price —
+ * the client value is never trusted. A booking is rejected unless the customer
+ * accepted the booking policies (policyAccepted).
  *
  * Hours: twelve one-hour slots, 3:00 PM to 3:00 AM, every day. After-midnight
  * hours are encoded 24 = 12 AM, 25 = 1 AM, 26 = 2 AM so each slot stays on the
@@ -35,8 +39,12 @@ var SLOT_COUNT = 12;
 
 var BOOKING_HEADERS = [
   "Timestamp", "Date", "TimeSlot", "Status",
-  "CustomerName", "Phone", "Service", "Price", "Email", "Notes", "Locale",
+  "CustomerName", "Phone", "Service", "Area", "Price", "Deposit",
+  "Email", "Notes", "PolicyAccepted", "Locale",
 ];
+
+// Deposit required to confirm a booking, as a fraction of the session price.
+var DEPOSIT_RATE = 0.5;
 
 /* ------------------------------ GET: availability ----------------------- */
 
@@ -85,6 +93,19 @@ function doPost(e) {
       return json_({ success: false, error: "Missing date or slot." });
     }
 
+    // The customer must have accepted the booking policies.
+    if (!isTruthy_(data.policyAccepted)) {
+      return json_({ success: false, error: "Booking policies must be accepted." });
+    }
+
+    // Never trust the client's deposit: recompute it as 50% of the numeric
+    // price. If the price can't be parsed we store a blank deposit rather than
+    // a wrong number.
+    var priceNum = parsePriceEGP_(data.price);
+    var depositText = priceNum > 0
+      ? Math.round(priceNum * DEPOSIT_RATE) + " EGP"
+      : "";
+
     // Serialize the check-and-write so two people can't grab the same slot.
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
@@ -92,11 +113,22 @@ function doPost(e) {
       if (getBookedSlotIds_(date).indexOf(slotId) !== -1) {
         return json_({ success: false, error: "That time was just booked by someone else." });
       }
-      appendRow_(BOOKINGS_TAB, BOOKING_HEADERS, [
-        now_(), date, slotId, "Booked",
-        data.customerName || "", data.phone || "", data.service || "",
-        data.price || "", data.email || "", data.notes || "", data.locale || "",
-      ]);
+      appendMapped_(BOOKINGS_TAB, BOOKING_HEADERS, {
+        "Timestamp": now_(),
+        "Date": date,
+        "TimeSlot": slotId,
+        "Status": "Booked",
+        "CustomerName": data.customerName || "",
+        "Phone": data.phone || "",
+        "Service": data.service || "",
+        "Area": data.area || "",
+        "Price": data.price || "",
+        "Deposit": depositText,
+        "Email": data.email || "",
+        "Notes": data.notes || "",
+        "PolicyAccepted": "yes",
+        "Locale": data.locale || "",
+      });
     } finally {
       lock.releaseLock();
     }
@@ -184,6 +216,51 @@ function appendRow_(tabName, headers, row) {
   sheet.appendRow(row);
 }
 
+/**
+ * Append a row addressed by header name, so column order is driven by the
+ * sheet itself. This is migration-safe: if the sheet predates a column, the
+ * missing header is appended at the end (existing rows keep their alignment and
+ * simply get a blank in the new column) and the value is written under it.
+ */
+function appendMapped_(tabName, requiredHeaders, dataMap) {
+  var sheet = getSheet_(tabName, true);
+  var headers;
+
+  if (sheet.getLastRow() === 0) {
+    headers = requiredHeaders.slice();
+    sheet.appendRow(headers);
+  } else {
+    headers = sheet.getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0].map(function (h) { return String(h); });
+    var added = false;
+    for (var i = 0; i < requiredHeaders.length; i++) {
+      if (headers.indexOf(requiredHeaders[i]) === -1) {
+        headers.push(requiredHeaders[i]);
+        added = true;
+      }
+    }
+    if (added) sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+
+  var row = headers.map(function (h) {
+    return Object.prototype.hasOwnProperty.call(dataMap, h) ? dataMap[h] : "";
+  });
+  sheet.appendRow(row);
+}
+
+/** Extract a numeric EGP amount from values like "400 EGP" or "400". */
+function parsePriceEGP_(value) {
+  var digits = String(value == null ? "" : value).replace(/[^0-9.]/g, "");
+  var n = parseFloat(digits);
+  return isNaN(n) ? 0 : n;
+}
+
+/** Loose truthiness for form flags: "yes" / "true" / "1" (any case). */
+function isTruthy_(value) {
+  var s = String(value == null ? "" : value).trim().toLowerCase();
+  return s === "yes" || s === "true" || s === "1";
+}
+
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
@@ -196,9 +273,12 @@ function json_(obj) {
  * choose your account -> Advanced -> "Go to project (unsafe)" -> Allow.
  */
 function testWrite() {
-  appendRow_(BOOKINGS_TAB, BOOKING_HEADERS, [
-    now_(), "2026-01-01", "15-16", "Booked",
-    "Test User", "0000000000", "Test service", "0 EGP", "", "manual test", "en",
-  ]);
+  appendMapped_(BOOKINGS_TAB, BOOKING_HEADERS, {
+    "Timestamp": now_(), "Date": "2026-01-01", "TimeSlot": "15-16",
+    "Status": "Booked", "CustomerName": "Test User", "Phone": "0000000000",
+    "Service": "Test service", "Area": "", "Price": "400 EGP",
+    "Deposit": "200 EGP", "Email": "", "Notes": "manual test",
+    "PolicyAccepted": "yes", "Locale": "en",
+  });
   Logger.log("testWrite OK — a row was added to the '" + BOOKINGS_TAB + "' tab.");
 }

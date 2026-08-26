@@ -4,7 +4,13 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Loader2 } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { services, getServiceCopy } from "@/lib/services";
+import type { AreaGroup, AreaOption } from "@/lib/services";
+import {
+  services,
+  getServiceCopy,
+  AREA_OPTIONS,
+  depositFor,
+} from "@/lib/services";
 import { cn, formatPrice } from "@/lib/utils";
 import {
   formatDayLong,
@@ -57,8 +63,18 @@ function discountedPrice(price: number, percent: number): number {
   return Math.round(price * (1 - percent / 100));
 }
 
+/** Localized "Upper Massage" / "Lower Cupping" labels for an area group. */
+function getAreaLabels(dict: Dictionary, group: AreaGroup) {
+  return dict.booking.areas.groups[group];
+}
+function getAreaLabel(dict: Dictionary, group: AreaGroup, area: AreaOption) {
+  return getAreaLabels(dict, group)[area];
+}
+
 interface FormState {
   serviceId: string;
+  // "" until an area is chosen; only meaningful for services with an areaGroup.
+  area: "" | AreaOption;
   date: string;
   time: string;
   name: string;
@@ -69,6 +85,7 @@ interface FormState {
 
 const emptyForm: FormState = {
   serviceId: "",
+  area: "",
   date: "",
   time: "",
   name: "",
@@ -99,6 +116,10 @@ export function BookingForm({
   const [promoInput, setPromoInput] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
   const [promoError, setPromoError] = useState("");
+
+  // The customer must tick the booking-policy checkbox before confirming.
+  const [policyAccepted, setPolicyAccepted] = useState(false);
+  const [policyError, setPolicyError] = useState("");
 
   // Booked slots per day, keyed by ISO date. A missing key means "not fetched
   // yet", which is what drives the loading state — so both are derived, never
@@ -144,9 +165,36 @@ export function BookingForm({
     ? getServiceCopy(dict, selectedService.id).name
     : "";
 
+  // Some services (Upper/Lower Massage, Upper/Lower Cupping) need an area choice.
+  const areaGroup = selectedService?.areaGroup;
+  const areaLabel =
+    areaGroup && form.area ? getAreaLabel(dict, areaGroup, form.area) : "";
+
+  // Pricing is derived from the selected service and any promo, so the deposit
+  // updates automatically whenever the service or discount changes. Deposit is
+  // always 50% of the price the customer actually pays.
+  const basePrice = selectedService?.priceEGP ?? 0;
+  const finalPrice = discountedPrice(basePrice, discountPercent);
+  const depositAmount = depositFor(finalPrice);
+
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
+  }
+
+  /**
+   * Pick a service. Switching services always clears any previous area choice —
+   * so an Upper/Lower selection can never linger on a service that doesn't use
+   * it, and switching between two area services forces a fresh choice.
+   */
+  function selectService(id: string) {
+    setForm((f) => ({ ...f, serviceId: id, area: "" }));
+    setErrors((e) => ({ ...e, serviceId: undefined, area: undefined }));
+  }
+
+  function selectArea(area: AreaOption) {
+    setForm((f) => ({ ...f, area }));
+    setErrors((e) => ({ ...e, area: undefined }));
   }
 
   function applyPromo() {
@@ -168,7 +216,11 @@ export function BookingForm({
 
   function validateStep(current: number): boolean {
     const next: Partial<Record<keyof FormState, string>> = {};
-    if (current === 0 && !form.serviceId) next.serviceId = t.errors.service;
+    if (current === 0) {
+      if (!form.serviceId) next.serviceId = t.errors.service;
+      // Area is mandatory for services that offer Upper/Lower.
+      else if (areaGroup && !form.area) next.area = t.areas.required;
+    }
     if (current === 1) {
       if (!form.date) next.date = t.errors.date;
       if (!form.time) next.time = t.errors.time;
@@ -179,9 +231,11 @@ export function BookingForm({
       if (!/^[\d\s+()-]{7,}$/.test(form.phone)) next.phone = t.errors.phone;
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
         next.email = t.errors.email;
+      if (!policyAccepted) setPolicyError(t.policy.acceptError);
     }
     setErrors(next);
-    return Object.keys(next).length === 0;
+    // Booking is blocked unless the policy is accepted on the final step.
+    return Object.keys(next).length === 0 && !(current === 2 && !policyAccepted);
   }
 
   function goNext() {
@@ -198,21 +252,26 @@ export function BookingForm({
     setSubmitError("");
 
     // Field names match the Apps Script's doPost contract exactly
-    // (date, slotId, customerName, phone, service). Extra fields are ignored
-    // by the script until columns exist for them.
-    const finalPrice = selectedService
-      ? discountedPrice(selectedService.priceEGP, discountPercent)
-      : 0;
+    // (date, slotId, customerName, phone, service, price). Area, deposit and
+    // policyAccepted are newer columns; an un-migrated script simply ignores
+    // them, so we also fold the chosen area into the service label as a
+    // fallback that always reaches the sheet.
+    const serviceForSheet = areaLabel
+      ? `${selectionLabel} — ${areaLabel}`
+      : selectionLabel;
 
     const result = await submitToSheet("booking", {
       date: form.date,
       slotId: form.time,
       customerName: form.name,
       phone: form.phone,
-      service: selectionLabel,
+      service: serviceForSheet,
+      area: areaLabel,
       price: selectedService ? `${finalPrice} EGP` : "",
+      deposit: selectedService ? `${depositAmount} EGP` : "",
       promoCode: discountPercent ? promoInput.trim().toUpperCase() : "",
       discount: discountPercent ? `${discountPercent}%` : "",
+      policyAccepted: "yes",
       email: form.email,
       notes: form.notes,
       locale,
@@ -251,6 +310,8 @@ export function BookingForm({
     setStatus("idle");
     setSubmitError("");
     removePromo();
+    setPolicyAccepted(false);
+    setPolicyError("");
   }
 
   if (status === "success") {
@@ -268,8 +329,10 @@ export function BookingForm({
             dict={dict}
             locale={locale}
             selectionLabel={selectionLabel}
+            areaLabel={areaLabel}
             price={selectedService?.priceEGP}
             discountPercent={discountPercent}
+            showDeposit
             date={form.date}
             time={form.time}
           />
@@ -335,7 +398,7 @@ export function BookingForm({
 
       <div className="rounded-3xl border border-primary-100 bg-surface p-5 shadow-[var(--shadow-card)] sm:p-8">
         <form onSubmit={handleSubmit} noValidate>
-          {/* Step 1: Service — the six services from the price list */}
+          {/* Step 1: Service — the services from the price list */}
           {step === 0 ? (
             <div>
               <h2 className="mb-5 text-lg font-semibold text-text-dark sm:text-xl">
@@ -350,7 +413,7 @@ export function BookingForm({
                     <button
                       key={service.id}
                       type="button"
-                      onClick={() => update("serviceId", service.id)}
+                      onClick={() => selectService(service.id)}
                       aria-pressed={active}
                       className={cn(
                         "rounded-2xl border p-4 text-start transition-all",
@@ -383,6 +446,41 @@ export function BookingForm({
                 })}
               </div>
               <FieldError message={errors.serviceId} />
+
+              {/* Area sub-choice — only for services that offer Upper/Lower */}
+              {areaGroup ? (
+                <div className="mt-5 rounded-2xl border border-primary-100 bg-primary-50/40 p-4">
+                  <p className="mb-3 text-sm font-semibold text-text-dark">
+                    {t.areas.prompt}
+                    <span className="text-accent"> *</span>
+                  </p>
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    {AREA_OPTIONS.map((area) => {
+                      const active = form.area === area;
+                      return (
+                        <button
+                          key={area}
+                          type="button"
+                          onClick={() => selectArea(area)}
+                          aria-pressed={active}
+                          className={cn(
+                            "flex items-center justify-between rounded-2xl border bg-surface p-4 text-start font-semibold transition-all",
+                            active
+                              ? "border-accent bg-primary-50/60 text-primary ring-1 ring-accent"
+                              : "border-primary-100 text-text-dark hover:border-primary-200 hover:bg-primary-50/30",
+                          )}
+                        >
+                          {getAreaLabel(dict, areaGroup, area)}
+                          {active ? (
+                            <Check className="h-4 w-4 text-accent" />
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <FieldError message={errors.area} />
+                </div>
+              ) : null}
             </div>
           ) : null}
 
@@ -505,7 +603,10 @@ export function BookingForm({
                     dict={dict}
                     locale={locale}
                     selectionLabel={selectionLabel}
+                    areaLabel={areaLabel}
                     price={selectedService?.priceEGP}
+                    discountPercent={discountPercent}
+                    showDeposit
                   />
                 </div>
               ) : null}
@@ -637,11 +738,46 @@ export function BookingForm({
                   dict={dict}
                   locale={locale}
                   selectionLabel={selectionLabel}
+                  areaLabel={areaLabel}
                   price={selectedService?.priceEGP}
                   discountPercent={discountPercent}
+                  showDeposit
                   date={form.date}
                   time={form.time}
                 />
+              </div>
+
+              {/* Booking policy — must be read and accepted before confirming */}
+              <div className="mt-6 rounded-2xl border border-primary-100 bg-surface p-4">
+                <p className="mb-2 text-sm font-semibold text-text-dark">
+                  {t.policy.title}
+                </p>
+                <ul className="space-y-1.5 text-sm leading-relaxed text-text-dark/70">
+                  {t.policy.points.map((point) => (
+                    <li key={point} className="flex gap-2">
+                      <span aria-hidden className="mt-1 text-accent">
+                        •
+                      </span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <label className="mt-4 flex cursor-pointer items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={policyAccepted}
+                    onChange={(e) => {
+                      setPolicyAccepted(e.target.checked);
+                      if (e.target.checked) setPolicyError("");
+                    }}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-primary-200 text-accent accent-accent focus:ring-accent"
+                  />
+                  <span className="text-sm font-medium text-text-dark">
+                    {t.policy.accept}
+                  </span>
+                </label>
+                <FieldError message={policyError} />
               </div>
 
               {submitError ? (
@@ -688,21 +824,28 @@ function SummaryRows({
   dict,
   locale,
   selectionLabel,
+  areaLabel = "",
   price,
   discountPercent = 0,
+  showDeposit = false,
   date,
   time,
 }: {
   dict: Dictionary;
   locale: Locale;
   selectionLabel: string;
+  areaLabel?: string;
   price?: number;
   discountPercent?: number;
+  showDeposit?: boolean;
   date?: string;
   time?: string;
 }) {
   const egp = dict.common.egp;
   const hasDiscount = Boolean(price) && discountPercent > 0;
+  // The charged price (post-discount) is what both the total and the deposit
+  // are based on, so a promo lowers the deposit too.
+  const charged = price ? discountedPrice(price, discountPercent) : 0;
   const rows: {
     label: string;
     value: string;
@@ -712,6 +855,8 @@ function SummaryRows({
 
   if (selectionLabel)
     rows.push({ label: dict.booking.steps.service, value: selectionLabel });
+  if (areaLabel)
+    rows.push({ label: dict.booking.areas.label, value: areaLabel });
   if (price)
     rows.push({
       // When discounted, this line shows the original price struck through.
@@ -720,7 +865,7 @@ function SummaryRows({
       strike: hasDiscount,
     });
   if (price && hasDiscount) {
-    const off = price - discountedPrice(price, discountPercent);
+    const off = price - charged;
     rows.push({
       label: dict.booking.promo.discount.replace(
         "{percent}",
@@ -730,10 +875,16 @@ function SummaryRows({
     });
     rows.push({
       label: dict.booking.promo.total,
-      value: `${formatPrice(discountedPrice(price, discountPercent), locale)} ${egp}`,
+      value: `${formatPrice(charged, locale)} ${egp}`,
       emphasis: true,
     });
   }
+  if (price && showDeposit)
+    rows.push({
+      label: dict.booking.deposit.label,
+      value: `${formatPrice(depositFor(charged), locale)} ${egp}`,
+      emphasis: true,
+    });
   if (date)
     rows.push({ label: dict.booking.fields.date, value: formatDayLong(date, locale) });
   if (time)
