@@ -347,12 +347,12 @@
     },
     "deposit": {
       "label": "Deposit (50%)",
-      "note": "50% of the session price, due at least 6 hours before your session."
+      "note": "50% of the session price, required when your session starts in 6 hours or less."
     },
     "policy": {
       "title": "Booking Policy",
       "points": [
-        "A 50% deposit is required and must be paid at least 6 hours before your session.",
+        "If your session starts in 6 hours or less, a 50% deposit is required to confirm the booking. Sessions booked more than 6 hours ahead need no deposit.",
         "If you cancel less than 6 hours before your session, the deposit is non-refundable — and booking any new session requires a new 50% deposit."
       ],
       "accept": "I have read and agree to the {link}.",
