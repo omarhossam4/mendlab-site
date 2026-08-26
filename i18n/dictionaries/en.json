@@ -84,6 +84,12 @@
       "title": "Ready to feel the difference?",
       "subtitle": "Book your first session at MendLab and start recovering the smart way.",
       "button": "Book Your Session"
+    },
+    "policy": {
+      "eyebrow": "Before You Book",
+      "title": "Booking Policies",
+      "show": "View booking policies",
+      "hide": "Hide booking policies"
     }
   },
   "services": {
@@ -165,17 +171,17 @@
         ]
       },
       "upper-package": {
-        "name": "Upper Package",
-        "short": "Upper massage + cupping for complete upper body relief.",
-        "description": "Our upper massage combined with cupping for complete upper body relief — the most thorough option for the neck, shoulders, upper back and arms.",
+        "name": "Upper / Lower Package",
+        "short": "Massage + cupping for the upper or lower body — you choose the area.",
+        "description": "Our massage combined with cupping for complete relief of the upper or lower body — you choose the area. The most thorough option for the area that needs it most.",
         "howItWorks": [
+          "You choose whether to treat the upper or lower body.",
           "A short assessment identifies tight and overloaded areas.",
-          "Targeted massage works through the neck, shoulders, upper back and arms.",
-          "Cupping is added to decompress tissue and boost circulation.",
-          "The session closes with mobility work for the area."
+          "Targeted massage works through the chosen area.",
+          "Cupping is added to decompress tissue and boost circulation."
         ],
         "benefits": [
-          "Complete upper body relief",
+          "Complete relief for your chosen area",
           "Massage and cupping combined",
           "Improved circulation",
           "Improved mobility"
@@ -332,6 +338,10 @@
         "cupping": {
           "upper": "Upper Cupping",
           "lower": "Lower Cupping"
+        },
+        "package": {
+          "upper": "Upper Package",
+          "lower": "Lower Package"
         }
       }
     },
@@ -342,12 +352,11 @@
     "policy": {
       "title": "Booking Policy",
       "points": [
-        "A 50% deposit of the session price is required to confirm your booking.",
-        "The deposit must be paid at least 6 hours before the session.",
-        "If you cancel less than 6 hours before your appointment, the 50% deposit is non-refundable.",
-        "If you book another session after cancelling less than 6 hours before your appointment, a new 50% deposit is required."
+        "A 50% deposit is required and must be paid at least 6 hours before your session.",
+        "If you cancel less than 6 hours before your session, the deposit is non-refundable — and booking any new session requires a new 50% deposit."
       ],
-      "accept": "I have read and agree to the booking policies.",
+      "accept": "I have read and agree to the {link}.",
+      "acceptLink": "booking policies",
       "acceptError": "Please read and accept the booking policies to continue."
     }
   },

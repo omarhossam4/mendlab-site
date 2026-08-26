@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Loader2 } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -11,13 +12,14 @@ import {
   AREA_OPTIONS,
   depositFor,
 } from "@/lib/services";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn, formatPrice, localeHref } from "@/lib/utils";
 import {
   formatDayLong,
   formatDayParts,
   formatSlotLabel,
   getBookableDays,
   getSlots,
+  hoursUntilSlot,
   isSlotInPast,
 } from "@/lib/slots";
 import { submitToSheet } from "@/lib/submit";
@@ -177,6 +179,12 @@ export function BookingForm({
   const finalPrice = discountedPrice(basePrice, discountPercent);
   const depositAmount = depositFor(finalPrice);
 
+  // The deposit line is only surfaced when the chosen slot is 6 hours away or
+  // less — that's the window in which the deposit becomes due.
+  const depositDue =
+    Boolean(form.date && form.time) &&
+    hoursUntilSlot(form.date, form.time) <= 6;
+
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
@@ -332,7 +340,7 @@ export function BookingForm({
             areaLabel={areaLabel}
             price={selectedService?.priceEGP}
             discountPercent={discountPercent}
-            showDeposit
+            showDeposit={depositDue}
             date={form.date}
             time={form.time}
           />
@@ -606,7 +614,7 @@ export function BookingForm({
                     areaLabel={areaLabel}
                     price={selectedService?.priceEGP}
                     discountPercent={discountPercent}
-                    showDeposit
+                    showDeposit={depositDue}
                   />
                 </div>
               ) : null}
@@ -741,29 +749,16 @@ export function BookingForm({
                   areaLabel={areaLabel}
                   price={selectedService?.priceEGP}
                   discountPercent={discountPercent}
-                  showDeposit
+                  showDeposit={depositDue}
                   date={form.date}
                   time={form.time}
                 />
               </div>
 
-              {/* Booking policy — must be read and accepted before confirming */}
-              <div className="mt-6 rounded-2xl border border-primary-100 bg-surface p-4">
-                <p className="mb-2 text-sm font-semibold text-text-dark">
-                  {t.policy.title}
-                </p>
-                <ul className="space-y-1.5 text-sm leading-relaxed text-text-dark/70">
-                  {t.policy.points.map((point) => (
-                    <li key={point} className="flex gap-2">
-                      <span aria-hidden className="mt-1 text-accent">
-                        •
-                      </span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <label className="mt-4 flex cursor-pointer items-start gap-3">
+              {/* Policy acceptance — the full text lives on the home page and
+                  opens when the "booking policies" link is followed. */}
+              <div className="mt-6">
+                <label className="flex cursor-pointer items-start gap-3">
                   <input
                     type="checkbox"
                     checked={policyAccepted}
@@ -774,7 +769,21 @@ export function BookingForm({
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-primary-200 text-accent accent-accent focus:ring-accent"
                   />
                   <span className="text-sm font-medium text-text-dark">
-                    {t.policy.accept}
+                    {(() => {
+                      const [before, after] = t.policy.accept.split("{link}");
+                      return (
+                        <>
+                          {before}
+                          <Link
+                            href={`${localeHref(locale, "/")}#booking-policy`}
+                            className="text-accent underline hover:no-underline"
+                          >
+                            {t.policy.acceptLink}
+                          </Link>
+                          {after}
+                        </>
+                      );
+                    })()}
                   </span>
                 </label>
                 <FieldError message={policyError} />

@@ -96,3 +96,18 @@ export function isSlotInPast(iso: string, slotId: string): boolean {
   if (iso !== toISODate(now)) return false;
   return slotStartHour(slotId) <= now.getHours();
 }
+
+/**
+ * The slot's actual start time as a Date. Start hours are encoded 15…26, so a
+ * "24-25" (12 AM) slot resolves to the following calendar morning — the Date
+ * constructor rolls hour ≥ 24 over into the next day automatically.
+ */
+export function slotStartDate(iso: string, slotId: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d, slotStartHour(slotId), 0, 0);
+}
+
+/** Hours from now until the slot starts (negative once it has passed). */
+export function hoursUntilSlot(iso: string, slotId: string): number {
+  return (slotStartDate(iso, slotId).getTime() - Date.now()) / 3_600_000;
+}

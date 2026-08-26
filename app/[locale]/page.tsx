@@ -6,6 +6,7 @@ import { MissionSection } from "@/features/home/MissionSection";
 import { WhySection } from "@/features/home/WhySection";
 import { ServicesPreview } from "@/features/home/ServicesPreview";
 import { CtaSection } from "@/features/home/CtaSection";
+import { BookingPolicy } from "@/features/home/BookingPolicy";
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
@@ -19,6 +20,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <WhySection locale={locale} dict={dict} />
       <ServicesPreview locale={locale} dict={dict} />
       <CtaSection locale={locale} dict={dict} />
+      <BookingPolicy locale={locale} dict={dict} />
     </>
   );
 }

@@ -15,7 +15,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
  * choice (see `booking.areas.groups.<areaGroup>` in the dictionaries). A service
  * without `areaGroup` needs no area choice.
  */
-export type AreaGroup = "massage" | "cupping";
+export type AreaGroup = "massage" | "cupping" | "package";
 export const AREA_OPTIONS = ["upper", "lower"] as const;
 export type AreaOption = (typeof AREA_OPTIONS)[number];
 
@@ -59,6 +59,7 @@ export const services: Service[] = [
     slug: "upper-package",
     image: "/images/recovery massage new.jpeg",
     priceEGP: 600,
+    areaGroup: "package",
   },
   {
     id: "full-body-massage",
